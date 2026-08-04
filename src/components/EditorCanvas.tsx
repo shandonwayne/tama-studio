@@ -136,8 +136,6 @@ export function EditorCanvas({
         floodFill(next, x, y, selectedColor, width, next.length);
         onGridChange(next);
         maybeGrow(y);
-      } else if (tool === 'rect') {
-        setStartCell([x, y]);
       }
     },
     [tool, selectedColor, grid, width, cloneGrid, setCell, onGridChange, maybeGrow],
@@ -160,9 +158,6 @@ export function EditorCanvas({
         const font = FONT_LIBRARIES[fontLibrary];
         const cells = textToCells(selectedLetter, textPreviewPos[0], textPreviewPos[1], font, 0);
         setPreview(cells);
-      } else if (tool === 'rect' && startCell) {
-        const cells = rectCells(startCell[0], startCell[1], x, y, rectMode);
-        setPreview(cells);
       }
     },
     [tool, selectedColor, startCell, cloneGrid, setCell, onGridChange, maybeGrow, selectedLetter, textPreviewPos, textMode, fontLibrary]
@@ -174,19 +169,8 @@ export function EditorCanvas({
         setTextPreviewPos(null);
         setPreview(null);
       }
-      if (tool === 'rect' && startCell) {
-        const next = cloneGrid();
-        const cells = rectCells(startCell[0], startCell[1], x, y, rectMode);
-        if (selectedColor) {
-          cells.forEach(([cx, cy]) => setCell(cx, cy, selectedColor, next));
-        }
-        onGridChange(next);
-        maybeGrow(y);
-        setStartCell(null);
-        setPreview(null);
-      }
     },
-    [tool, startCell, selectedColor, cloneGrid, setCell, onGridChange, maybeGrow, textMode]
+    [tool, textMode]
   );
 
   const snapshotBefore = useCallback(() => {
@@ -230,7 +214,7 @@ export function EditorCanvas({
       else if (e.key === 'l') setTool('line');
       else if (e.key === 'r') setTool('rect');
       else if (e.key === 'o' && projectType === 'freehand' && brand === 'miyuki' && miyukiShape === 'delica') onToggleOrientation();
-      else if (e.key === 'Escape' && tool === 'line' && startCell) {
+      else if (e.key === 'Escape' && (tool === 'line' || tool === 'rect') && startCell) {
         setStartCell(null);
         setPreview(null);
       }
@@ -259,7 +243,7 @@ export function EditorCanvas({
       setPreview(null);
       return;
     }
-    if (tool === 'line') {
+    if (tool === 'line' || tool === 'rect') {
       if (!startCell) {
         setStartCell([x, y]);
         setPreview([[x, y]]);
@@ -272,7 +256,10 @@ export function EditorCanvas({
       }
       snapshotBefore();
       const next = cloneGrid();
-      const cells = bresenham(startCell[0], startCell[1], x, y);
+      const cells =
+        tool === 'line'
+          ? bresenham(startCell[0], startCell[1], x, y)
+          : rectCells(startCell[0], startCell[1], x, y, rectMode);
       cells.forEach(([cx, cy]) => setCell(cx, cy, selectedColor, next));
       onGridChange(next);
       maybeGrow(y);
@@ -301,6 +288,11 @@ export function EditorCanvas({
       setPreview(cells);
       return;
     }
+    if (tool === 'rect' && startCell && !isDrawing) {
+      const cells = rectCells(startCell[0], startCell[1], x, y, rectMode);
+      setPreview(cells);
+      return;
+    }
     if (!isDrawing) return;
     continueTool(x, y);
   };
@@ -310,7 +302,7 @@ export function EditorCanvas({
       setTextPreviewPos(null);
       setPreview(null);
     }
-    if (tool === 'line' && startCell && !isDrawing) {
+    if ((tool === 'line' || tool === 'rect') && startCell && !isDrawing) {
       setPreview(null);
     }
   };
@@ -628,7 +620,7 @@ export function EditorCanvas({
                           }}
                         />
                       )}
-                      {tool === 'line' && startCell && startCell[0] === x && startCell[1] === y && (
+                      {(tool === 'line' || tool === 'rect') && startCell && startCell[0] === x && startCell[1] === y && (
                         <div className="absolute inset-0 pointer-events-none border-2 border-amber-500 rounded-sm animate-pulse" />
                       )}
                     </div>
