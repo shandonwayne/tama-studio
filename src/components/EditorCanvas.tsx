@@ -310,14 +310,14 @@ export function EditorCanvas({
     const isDelica = brand === 'miyuki' && miyukiShape === 'delica';
     if (isLoom) {
       const cw = Math.floor(Math.min(640 / width, 28));
-      // Rocailles: portrait oval — narrower than tall (w:h ≈ 3:4)
+      // Rocailles: portrait rounded square — slightly taller than wide
       // Delica: landscape rectangle — wider than tall (w:h ≈ 4:3)
-      if (isRocailles) return { w: cw, h: Math.round(cw * 1.35) };
+      if (isRocailles) return { w: cw, h: Math.round(cw * 1.2) };
       if (isDelica)    return { w: cw, h: Math.round(cw * 0.75) };
       return { w: cw, h: cw };
     }
     const cw = Math.floor(Math.min(640 / width, 520 / height, 32));
-    if (isRocailles) return { w: cw, h: Math.round(cw * 1.35) };
+    if (isRocailles) return { w: cw, h: Math.round(cw * 1.2) };
     if (isDelica)    return { w: cw, h: Math.round(cw * 0.75) };
     return { w: cw, h: cw };
   }, [width, height, isLoom, brand, miyukiShape]);
@@ -325,11 +325,11 @@ export function EditorCanvas({
   const cellW = Math.round(cellSize.w * zoom);
   const cellH = Math.round(cellSize.h * zoom);
 
-  // Rocailles: true oval (portrait) — 50% radius makes the rectangular cell an ellipse
+  // Rocailles: rounded square — generous but not full radius
   // Delica: rounded rectangle — moderate corner radius
   const beadRadius: string | number =
     brand === 'miyuki' && miyukiShape === 'rocailles'
-      ? '50%'
+      ? '38%'
       : brand === 'miyuki' && miyukiShape === 'delica'
       ? Math.round(Math.min(cellW, cellH) * 0.3)
       : brand === 'toho'
