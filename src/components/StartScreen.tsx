@@ -41,6 +41,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
     label: string;
     icon: React.ReactNode;
     select: () => void;
+    disabled?: boolean;
+    badge?: string;
   }[] = [
     {
       value: 'miyuki-delica',
@@ -64,10 +66,9 @@ export function StartScreen({ onStart }: StartScreenProps) {
       value: 'toho',
       label: 'Toho',
       icon: <div className="w-3.5 h-3.5 rounded-full bg-sky-400" />,
-      select: () => {
-        setBrand('toho');
-        setMiyukiShape('delica');
-      },
+      select: () => {},
+      disabled: true,
+      badge: 'Coming soon',
     },
   ];
 
@@ -153,18 +154,27 @@ export function StartScreen({ onStart }: StartScreenProps) {
                     <li key={opt.value}>
                       <button
                         type="button"
+                        disabled={opt.disabled}
                         onClick={() => {
+                          if (opt.disabled) return;
                           opt.select();
                           setBrandOpen(false);
                         }}
                         className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition ${
-                          selectedBrandOption.value === opt.value
+                          opt.disabled
+                            ? 'text-stone-400 cursor-not-allowed'
+                            : selectedBrandOption.value === opt.value
                             ? 'bg-amber-50 text-amber-700 font-medium'
                             : 'text-stone-700 hover:bg-stone-50'
                         }`}
                       >
                         {opt.icon}
                         {opt.label}
+                        {opt.badge && (
+                          <span className="ml-auto text-[10px] font-medium text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
+                            {opt.badge}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}

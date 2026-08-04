@@ -335,14 +335,11 @@ export default function App() {
                       )}
                     </button>
                     <button
-                      onClick={() => handleConvertBrand('toho')}
-                      disabled={config.brand === 'toho'}
-                      className="w-full flex items-center justify-between px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-amber-50 disabled:opacity-40 disabled:hover:bg-transparent transition"
+                      disabled
+                      className="w-full flex items-center justify-between px-3 py-2.5 text-left text-sm text-stone-400 cursor-not-allowed transition"
                     >
                       Toho Treasure
-                      {config.brand === 'toho' && (
-                        <span className="text-[10px] text-stone-400">current</span>
-                      )}
+                      <span className="text-[10px] font-medium text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">Coming soon</span>
                     </button>
                     <div className="px-3 py-2 border-t border-stone-100 text-[10px] text-stone-400">
                       Colors matched to closest available bead
