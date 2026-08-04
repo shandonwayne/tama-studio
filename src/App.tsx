@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Save,
-  Download,
-  FolderOpen,
   Home,
   Grid2x2,
   Sparkles,
@@ -20,12 +18,12 @@ import { StartScreen } from '@/components/StartScreen';
 import { EditorCanvas } from '@/components/EditorCanvas';
 import { PalettePanel } from '@/components/PalettePanel';
 import { BeadCountPanel } from '@/components/BeadCountPanel';
-import { GalleryPanel } from '@/components/GalleryPanel';
+
 import { TextPanel } from '@/components/TextPanel';
 import logoUrl from '/logo.svg';
 import type { FontLibraryName } from '@/lib/oldEnglishFont';
 import { FONT_LIBRARIES } from '@/lib/oldEnglishFont';
-import { supabase, BeadProject } from '@/lib/supabase';
+
 import { useExportPNG, downloadProjectFile, parseProjectFile } from '@/lib/export';
 import { BeadColor, Brand, MiyukiShape, ProjectType, StitchType, findColor, convertGridColors } from '@/beads';
 
@@ -53,14 +51,10 @@ export default function App() {
   const [rotations, setRotations] = useState<number[][]>([]);
   const [customColors, setCustomColors] = useState<BeadColor[]>([]);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [galleryOpen, setGalleryOpen] = useState(false);
+
   const [leftTab, setLeftTab] = useState<'colors' | 'text'>('colors');
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [fontLibrary, setFontLibrary] = useState<FontLibraryName>('Gothic');
-  const [saveState, setSaveState] = useState<
-    'idle' | 'saving' | 'saved' | 'error'
-  >('idle');
   const [toast, setToast] = useState<string | null>(null);
   const [rightRailOpen, setRightRailOpen] = useState(true);
   const [brandMenuOpen, setBrandMenuOpen] = useState(false);
@@ -95,7 +89,6 @@ export default function App() {
     setConfig(c);
     setGrid(emptyGrid(c.width, c.height));
     setRotations(emptyRotations(c.width, c.height));
-    setProjectId(null);
   };
 
   const handleGrowRows = (count: number) => {
@@ -150,82 +143,7 @@ export default function App() {
     );
   }, []);
 
-  const handleLoad = (p: BeadProject) => {
-    const shape: MiyukiShape =
-      p.miyuki_shape === 'rocailles' ? 'rocailles' : 'delica';
-    setConfig({
-      projectType: p.project_type,
-      brand: p.brand,
-      miyukiShape: shape,
-      stitch: p.stitch === 'peyote' ? 'peyote' : 'brick',
-      width: p.width,
-      height: p.height,
-      name: p.name,
-    });
-    setGrid(
-      Array.isArray(p.grid_data) ? (p.grid_data as (string | null)[][]) : emptyGrid(p.width, p.height)
-    );
-    const loadedRot = Array.isArray(p.rotations_data) ? (p.rotations_data as number[][]) : null;
-    setRotations(
-      loadedRot && loadedRot.length === p.height && loadedRot[0]?.length === p.width
-        ? loadedRot
-        : emptyRotations(p.width, p.height)
-    );
-    setProjectId(p.id);
-    // For 'other' brand projects, restore any custom colors embedded in the grid
-    if (p.brand === 'other') {
-      const codes = new Set<string>();
-      (p.grid_data as (string | null)[][]).forEach((row) =>
-        row.forEach((c) => {
-          if (c && c.startsWith('C-')) codes.add(c);
-        })
-      );
-      // We can't reconstruct hex from code alone; keep current custom colors.
-    }
-  };
 
-  const handleSave = useCallback(async () => {
-    if (!config || !grid) return;
-    setSaveState('saving');
-    const payload = {
-      name: config.name,
-      project_type: config.projectType,
-      brand: config.brand,
-      miyuki_shape: config.brand === 'miyuki' ? config.miyukiShape : null,
-      stitch: config.stitch,
-      width: config.width,
-      height: config.height,
-      grid_data: grid as unknown as never,
-      rotations_data: rotations as unknown as never,
-      updated_at: new Date().toISOString(),
-    };
-    try {
-      if (projectId) {
-        const { error } = await supabase
-          .from('bead_projects')
-          .update(payload)
-          .eq('id', projectId);
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from('bead_projects')
-          .insert(payload)
-          .select()
-          .single();
-        if (error) throw error;
-        setProjectId(data.id);
-      }
-      setSaveState('saved');
-      setTimeout(() => setSaveState('idle'), 1800);
-    } catch (err) {
-      setSaveState('error');
-      setToast('Could not save project');
-      setTimeout(() => {
-        setSaveState('idle');
-        setToast(null);
-      }, 2500);
-    }
-  }, [config, grid, rotations, projectId]);
 
   const handleExportPNG = () => {
     if (!config || !grid) return;
@@ -269,7 +187,6 @@ export default function App() {
       setGrid(f.grid);
       setRotations(f.rotations ?? emptyRotations(f.width, f.height));
       setCustomColors(f.customColors ?? []);
-      setProjectId(null);
       setToast('Project imported');
       setTimeout(() => setToast(null), 2000);
     } catch {
@@ -313,7 +230,6 @@ export default function App() {
           <button
             onClick={() => {
               setConfig(null);
-              setProjectId(null);
             }}
             className="flex items-center gap-2 text-stone-700 hover:text-amber-600 transition flex-shrink-0"
           >
@@ -418,36 +334,30 @@ export default function App() {
           </button>
 
           {/* Actions */}
-          <button
-            onClick={() => setGalleryOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition"
-          >
-            <FolderOpen className="w-4 h-4" />
-            <span className="hidden sm:inline">Open</span>
-          </button>
+          <label className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100 transition cursor-pointer">
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Import</span>
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => handleImportProject(String(reader.result));
+                reader.readAsText(file);
+                e.target.value = '';
+              }}
+            />
+          </label>
           <div className="relative">
             <button
               onClick={() => setSaveMenuOpen(!saveMenuOpen)}
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm ${
-                saveState === 'saved'
-                  ? 'bg-green-500 text-white'
-                  : saveState === 'saving'
-                  ? 'bg-amber-400 text-white'
-                  : saveState === 'error'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-amber-500 text-white hover:bg-amber-600'
-              }`}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm bg-amber-500 text-white hover:bg-amber-600"
             >
               <Save className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {saveState === 'saving'
-                  ? 'Saving…'
-                  : saveState === 'saved'
-                  ? 'Saved!'
-                  : saveState === 'error'
-                  ? 'Error'
-                  : 'Save'}
-              </span>
+              <span className="hidden sm:inline">Save</span>
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
             {saveMenuOpen && (
@@ -457,15 +367,6 @@ export default function App() {
                   onClick={() => setSaveMenuOpen(false)}
                 />
                 <div className="absolute right-0 top-full mt-1 z-50 w-56 bg-white rounded-xl border border-stone-200 shadow-lg overflow-hidden">
-                  <button
-                    onClick={handleSave}
-                    disabled={saveState === 'saving'}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-amber-50 disabled:opacity-50 transition"
-                  >
-                    <Save className="w-4 h-4 text-amber-600" />
-                    Save to gallery
-                  </button>
-                  <div className="border-t border-stone-100" />
                   <button
                     onClick={handleExportPNG}
                     className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-amber-50 transition"
@@ -480,27 +381,6 @@ export default function App() {
                     <FileJson className="w-4 h-4 text-amber-600" />
                     Download project file
                   </button>
-                  <div className="border-t border-stone-100" />
-                  <label className="w-full flex items-center gap-2 px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-amber-50 transition cursor-pointer">
-                    <Upload className="w-4 h-4 text-amber-600" />
-                    Import project file
-                    <input
-                      type="file"
-                      accept=".json,application/json"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          handleImportProject(String(reader.result));
-                          setSaveMenuOpen(false);
-                        };
-                        reader.readAsText(file);
-                        e.target.value = '';
-                      }}
-                    />
-                  </label>
                 </div>
               </>
             )}
@@ -604,17 +484,6 @@ export default function App() {
           )}
         </div>
       </main>
-
-      {/* Gallery modal */}
-      <GalleryPanel
-        open={galleryOpen}
-        onClose={() => setGalleryOpen(false)}
-        currentCustomColors={customColors}
-        onLoad={handleLoad}
-        onDelete={(id) => {
-          if (projectId === id) setProjectId(null);
-        }}
-      />
 
       {/* Toast */}
       {toast && (
