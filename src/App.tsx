@@ -6,7 +6,6 @@ import {
   Home,
   Grid2x2,
   Sparkles,
-  Palette as PaletteIcon,
   Type,
   Droplet,
   PanelRightClose,
@@ -20,6 +19,7 @@ import { PalettePanel } from '@/components/PalettePanel';
 import { BeadCountPanel } from '@/components/BeadCountPanel';
 import { GalleryPanel } from '@/components/GalleryPanel';
 import { TextPanel } from '@/components/TextPanel';
+import logoUrl from '/logo.svg';
 import type { FontLibraryName } from '@/lib/oldEnglishFont';
 import { FONT_LIBRARIES } from '@/lib/oldEnglishFont';
 import { supabase, BeadProject } from '@/lib/supabase';
@@ -266,12 +266,7 @@ export default function App() {
             }}
             className="flex items-center gap-2 text-stone-700 hover:text-amber-600 transition flex-shrink-0"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-              <PaletteIcon className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-stone-800 hidden sm:inline">
-              BeadPixel
-            </span>
+            <img src={logoUrl} alt="Tama Studio" className="h-7 w-auto" />
           </button>
 
           <div className="flex-1 min-w-0">
