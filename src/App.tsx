@@ -111,34 +111,35 @@ export default function App() {
     });
   };
 
-  const handleRotateGrid = useCallback(() => {
+  const handleToggleOrientation = useCallback(() => {
     setGrid((prev) => {
       const h = prev.length;
       const w = prev[0]?.length ?? 0;
-      // 90° clockwise: new[h][w] where new[r][c] = old[h-1-c][r]
-      const rotated: (string | null)[][] = Array.from({ length: w }, () =>
+      if (w === h) return prev;
+      // Transpose so landscape <-> portrait
+      const transposed: (string | null)[][] = Array.from({ length: w }, () =>
         Array<string | null>(h).fill(null)
       );
       for (let r = 0; r < h; r++) {
         for (let c = 0; c < w; c++) {
-          rotated[c][h - 1 - r] = prev[r][c];
+          transposed[c][r] = prev[r][c];
         }
       }
-      return rotated;
+      return transposed;
     });
     setRotations((prev) => {
       const h = prev.length;
       const w = prev[0]?.length ?? 0;
-      const rotated: number[][] = Array.from({ length: w }, () =>
+      if (w === h) return prev;
+      const transposed: number[][] = Array.from({ length: w }, () =>
         Array<number>(h).fill(0)
       );
       for (let r = 0; r < h; r++) {
         for (let c = 0; c < w; c++) {
-          // bead that was at (r,c) moves to (c, h-1-r); its own rotation +90°
-          rotated[c][h - 1 - r] = ((prev[r]?.[c] ?? 0) + 90) % 360;
+          transposed[c][r] = prev[r]?.[c] ?? 0;
         }
       }
-      return rotated;
+      return transposed;
     });
     setConfig((prev) =>
       prev ? { ...prev, width: prev.height, height: prev.width } : prev
@@ -478,7 +479,7 @@ export default function App() {
               customColors={customColors}
               selectedColor={selectedColor}
               onGridChange={setGrid}
-              onRotateGrid={handleRotateGrid}
+              onToggleOrientation={handleToggleOrientation}
               onGrowRows={handleGrowRows}
               textMode={leftTab === 'text'}
               selectedLetter={selectedLetter}

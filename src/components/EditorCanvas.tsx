@@ -13,14 +13,15 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
-  RotateCw,
+  RectangleHorizontal,
+  RectangleVertical,
 } from 'lucide-react';
 import type { BeadColor, Brand, MiyukiShape, ProjectType, StitchType } from '@/beads';
 import { findColor } from '@/beads';
 import { textToCells } from '@/lib/oldEnglishFont';
 import { FONT_LIBRARIES, type FontLibraryName } from '@/lib/oldEnglishFont';
 
-type Tool = 'paint' | 'erase' | 'fill' | 'eyedropper' | 'line' | 'rect' | 'rotate';
+type Tool = 'paint' | 'erase' | 'fill' | 'eyedropper' | 'line' | 'rect';
 type RectMode = 'filled' | 'outline';
 
 interface EditorCanvasProps {
@@ -36,7 +37,7 @@ interface EditorCanvasProps {
   customColors: BeadColor[];
   selectedColor: string | null;
   onGridChange: (grid: (string | null)[][]) => void;
-  onRotateGrid: () => void;
+  onToggleOrientation: () => void;
   onGrowRows: (count: number) => void;
   textMode: boolean;
   selectedLetter: string | null;
@@ -60,7 +61,7 @@ export function EditorCanvas({
   customColors,
   selectedColor,
   onGridChange,
-  onRotateGrid,
+  onToggleOrientation,
   onGrowRows,
   textMode,
   selectedLetter,
@@ -134,13 +135,11 @@ export function EditorCanvas({
         floodFill(next, x, y, selectedColor, width, next.length);
         onGridChange(next);
         maybeGrow(y);
-      } else if (tool === 'rotate') {
-        onRotateGrid();
       } else if (tool === 'line' || tool === 'rect') {
         setStartCell([x, y]);
       }
     },
-    [tool, selectedColor, grid, width, cloneGrid, setCell, onGridChange, onRotateGrid, maybeGrow],
+    [tool, selectedColor, grid, width, cloneGrid, setCell, onGridChange, maybeGrow],
   );
 
   const continueTool = useCallback(
@@ -235,11 +234,11 @@ export function EditorCanvas({
       else if (e.key === 'i') setTool('eyedropper');
       else if (e.key === 'l') setTool('line');
       else if (e.key === 'r') setTool('rect');
-      else if (e.key === 'o') setTool('rotate');
+      else if (e.key === 'o' && projectType === 'freehand') onToggleOrientation();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
+  }, [undo, redo, onToggleOrientation, projectType]);
 
   const handlePointerDown = (x: number, y: number, e: React.PointerEvent) => {
     e.preventDefault();
@@ -347,9 +346,6 @@ export function EditorCanvas({
     { id: 'line', icon: <Minus className="w-4 h-4" />, label: 'Line', key: 'L' },
     { id: 'rect', icon: <Square className="w-4 h-4" />, label: 'Rect', key: 'R' },
 
-    ...(projectType === 'freehand'
-      ? [{ id: 'rotate' as Tool, icon: <RotateCw className="w-4 h-4" />, label: 'Rotate', key: 'O' }]
-      : []),
   ];
 
   const canUndo = historyRef.current.length > 0;
@@ -423,6 +419,26 @@ export function EditorCanvas({
           )
         )}
         <div className="w-px h-6 bg-stone-200 mx-1" />
+        {projectType === 'freehand' && (
+          <button
+            onClick={onToggleOrientation}
+            className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition ${
+              width !== height
+                ? 'text-amber-600 hover:bg-amber-50'
+                : 'text-stone-600 hover:bg-stone-100'
+            }`}
+            title={`Orientation: ${width > height ? 'Landscape' : width < height ? 'Portrait' : 'Square'} — click to toggle (O)`}
+          >
+            {width >= height ? (
+              <RectangleHorizontal className="w-4 h-4" />
+            ) : (
+              <RectangleVertical className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">
+              {width > height ? 'Landscape' : width < height ? 'Portrait' : 'Square'}
+            </span>
+          </button>
+        )}
         <button
           onClick={() => setShowGrid(!showGrid)}
           className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition ${
