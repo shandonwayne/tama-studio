@@ -329,7 +329,7 @@ export function EditorCanvas({
   // Delica: rounded rectangle — moderate corner radius
   const beadRadius: string | number =
     brand === 'miyuki' && miyukiShape === 'rocailles'
-      ? '50%'
+      ? 3
       : brand === 'miyuki' && miyukiShape === 'delica'
       ? Math.round(Math.min(cellW, cellH) * 0.3)
       : brand === 'toho'

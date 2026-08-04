@@ -49,7 +49,7 @@ function getBeadRadius(
   cellW: number,
   cellH: number
 ): number {
-  if (isRocaille(brand, miyukiShape)) return 0; // drawn as ellipse
+  if (isRocaille(brand, miyukiShape)) return 3;
   if (brand === 'miyuki' && miyukiShape === 'delica')
     return Math.round(Math.min(cellW, cellH) * 0.3);
   if (brand === 'toho') return Math.floor(cellW / 3);
@@ -66,12 +66,7 @@ function drawBead(
   h: number,
   radius: number
 ) {
-  if (isRocaille(brand, miyukiShape)) {
-    ctx.beginPath();
-    ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
-  } else {
-    roundedRect(ctx, x, y, w, h, radius);
-  }
+  roundedRect(ctx, x, y, w, h, radius);
 }
 
 export function renderGridToCanvas(
