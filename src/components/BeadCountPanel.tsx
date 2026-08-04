@@ -85,8 +85,8 @@ export function BeadCountPanel({
   const scaleW = previewMaxW / totalW;
   const scaleH = previewMaxH / totalH;
   const scale = Math.min(scaleW, scaleH, 4);
-  const pxW = Math.max(1, Math.round(cellAspect.w * scale));
-  const pxH = Math.max(1, Math.round(cellAspect.h * scale));
+  const pxW = Math.max(4, Math.round(cellAspect.w * scale));
+  const pxH = Math.max(4, Math.round(cellAspect.h * scale));
 
   return (
     <div className="flex flex-col h-full bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
@@ -106,7 +106,7 @@ export function BeadCountPanel({
         <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wide mb-1.5">
           Preview
         </p>
-        <div className="rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center" style={{ maxHeight: 360, minHeight: 200 }}>
+        <div className="rounded-lg overflow-auto border border-stone-200 bg-stone-50 flex items-center justify-center" style={{ maxHeight: 360, minHeight: 200 }}>
           {cols > 0 && gridRows > 0 ? (
             <div
               style={{
