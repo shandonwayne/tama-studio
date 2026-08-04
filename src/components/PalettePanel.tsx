@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, X, Plus, SlidersHorizontal, Droplet, Type } from 'lucide-react';
+import { Search, X, Plus, SlidersHorizontal, Droplet, Type, Check } from 'lucide-react';
 import type { BeadColor, BeadType, Brand, MiyukiShape } from '@/beads';
 import { getBrandColors, getBeadType, BEAD_TYPE_ORDER, shortName } from '@/beads';
 import { ColorSpectrumPicker } from './ColorSpectrumPicker';
@@ -204,30 +204,39 @@ export function PalettePanel({
         )}
 
         {showFilters && showTypeFilter && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            <button
-              onClick={() => setActiveType('All')}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition border ${
-                activeType === 'All'
-                  ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white text-stone-600 border-stone-200 hover:border-amber-300'
-              }`}
-            >
-              All
-            </button>
-            {availableTypes.map((t) => (
+          <div className="mt-3">
+            <div className="flex flex-wrap gap-1.5">
               <button
-                key={t}
-                onClick={() => setActiveType(t)}
+                onClick={() => setActiveType('All')}
                 className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition border ${
-                  activeType === t
+                  activeType === 'All'
                     ? 'bg-amber-500 text-white border-amber-500'
                     : 'bg-white text-stone-600 border-stone-200 hover:border-amber-300'
                 }`}
               >
-                {t}
+                All
               </button>
-            ))}
+              {availableTypes.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setActiveType(t)}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition border ${
+                    activeType === t
+                      ? 'bg-amber-500 text-white border-amber-500'
+                      : 'bg-white text-stone-600 border-stone-200 hover:border-amber-300'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowFilters(false)}
+              className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500 text-white hover:bg-amber-600 transition"
+            >
+              <Check className="w-3.5 h-3.5" />
+              Apply
+            </button>
           </div>
         )}
       </div>

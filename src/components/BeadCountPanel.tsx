@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { ShoppingBag, Hash } from 'lucide-react';
 import type { BeadColor, Brand, MiyukiShape } from '@/beads';
 import { findColor, shortName } from '@/beads';
+import { getOrientation } from '@/beads/aspect';
 
 interface BeadCountPanelProps {
   grid: (string | null)[][];
@@ -55,6 +56,38 @@ export function BeadCountPanel({
   const cols = grid[0]?.length ?? 0;
   const gridRows = grid.length;
 
+  const isRocailles = brand === 'miyuki' && miyukiShape === 'rocailles';
+  const isDelica = brand === 'miyuki' && miyukiShape === 'delica';
+  const orientation = getOrientation(cols, gridRows);
+
+  // Cell aspect ratio for preview pixels, matching the editor's bead shape
+  const cellAspect = useMemo(() => {
+    // Base aspect (portrait): rocailles 1:1.2, delica 1:0.75, other 1:1
+    let wRatio = 1;
+    let hRatio = 1;
+    if (isRocailles) hRatio = 1.2;
+    else if (isDelica) hRatio = 0.75;
+    // Flip for landscape
+    if (orientation === 'landscape' && wRatio !== hRatio) {
+      return { w: hRatio, h: wRatio };
+    }
+    return { w: wRatio, h: hRatio };
+  }, [isRocailles, isDelica, orientation]);
+
+  const beadRadiusClass = isRocailles ? '38%' : isDelica ? '30%' : '33%';
+  const previewPixelShape = isRocailles || isDelica ? 'bead' : 'square';
+
+  // Use an explicit width×height for the preview grid based on cell aspect
+  const previewMaxW = 220;
+  const previewMaxH = 110;
+  const totalW = cols * cellAspect.w;
+  const totalH = gridRows * cellAspect.h;
+  const scaleW = previewMaxW / totalW;
+  const scaleH = previewMaxH / totalH;
+  const scale = Math.min(scaleW, scaleH, 1);
+  const pxW = Math.max(1, Math.round(cellAspect.w * scale));
+  const pxH = Math.max(1, Math.round(cellAspect.h * scale));
+
   return (
     <div className="flex flex-col h-full bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
       <div className="p-4 border-b border-stone-100">
@@ -73,26 +106,36 @@ export function BeadCountPanel({
         <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wide mb-1.5">
           Preview
         </p>
-        <div className="rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center" style={{ maxHeight: 120 }}>
+        <div className="rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center" style={{ maxHeight: 120, minHeight: 60 }}>
           {cols > 0 && gridRows > 0 ? (
             <div
-              className="grid"
               style={{
-                gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                width: '100%',
-                maxWidth: 220,
-                aspectRatio: `${cols} / ${gridRows}`,
+                display: 'grid',
+                gridTemplateColumns: `repeat(${cols}, ${pxW}px)`,
+                gridAutoRows: `${pxH}px`,
+                width: cols * pxW,
+                height: gridRows * pxH,
               }}
             >
               {grid.flatMap((row, y) =>
-                row.map((code, x) => (
-                  <div
-                    key={`${x}-${y}`}
-                    style={{
-                      backgroundColor: code ? (colorMap.get(code) ?? '#cccccc') : 'transparent',
-                    }}
-                  />
-                ))
+                row.map((code, x) => {
+                  const color = code ? (colorMap.get(code) ?? '#cccccc') : null;
+                  return (
+                    <div
+                      key={`${x}-${y}`}
+                      style={
+                        previewPixelShape === 'bead' && color
+                          ? {
+                              backgroundColor: color,
+                              borderRadius: beadRadiusClass,
+                            }
+                          : {
+                              backgroundColor: color ?? 'transparent',
+                            }
+                      }
+                    />
+                  );
+                })
               )}
             </div>
           ) : (

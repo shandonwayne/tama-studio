@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { findColor } from '@/beads';
 import type { BeadColor, Brand, MiyukiShape } from '@/beads';
+import { getCellDimensions as getAspectCellDimensions, getBeadRadius as getAspectBeadRadius } from '@/beads/aspect';
 
 interface ExportOpts {
   brand: Brand;
@@ -27,35 +28,6 @@ function roundedRect(
   ctx.closePath();
 }
 
-function getCellDimensions(
-  brand: Brand,
-  miyukiShape: MiyukiShape | undefined | null,
-  baseSize: number
-): { w: number; h: number } {
-  const isRocailles = brand === 'miyuki' && miyukiShape === 'rocailles';
-  const isDelica = brand === 'miyuki' && miyukiShape === 'delica';
-  if (isRocailles) return { w: baseSize, h: Math.round(baseSize * 1.35) };
-  if (isDelica)    return { w: baseSize, h: Math.round(baseSize * 0.75) };
-  return { w: baseSize, h: baseSize };
-}
-
-function isRocaille(brand: Brand, miyukiShape: MiyukiShape | undefined | null) {
-  return brand === 'miyuki' && miyukiShape === 'rocailles';
-}
-
-function getBeadRadius(
-  brand: Brand,
-  miyukiShape: MiyukiShape | undefined | null,
-  cellW: number,
-  cellH: number
-): number {
-  if (isRocaille(brand, miyukiShape)) return 0; // drawn as ellipse
-  if (brand === 'miyuki' && miyukiShape === 'delica')
-    return Math.round(Math.min(cellW, cellH) * 0.3);
-  if (brand === 'toho') return Math.floor(cellW / 3);
-  return 2;
-}
-
 function drawBead(
   ctx: CanvasRenderingContext2D,
   brand: Brand,
@@ -64,13 +36,13 @@ function drawBead(
   y: number,
   w: number,
   h: number,
-  radius: number
+  radius: string | number
 ) {
-  if (isRocaille(brand, miyukiShape)) {
+  if (typeof radius === 'string' && radius.endsWith('%')) {
     ctx.beginPath();
     ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
   } else {
-    roundedRect(ctx, x, y, w, h, radius);
+    roundedRect(ctx, x, y, w, h, radius as number);
   }
 }
 
@@ -82,14 +54,15 @@ export function renderGridToCanvas(
 ): HTMLCanvasElement {
   const h = grid.length;
   const w = h > 0 ? grid[0].length : 0;
-  const { w: cellW, h: cellH } = getCellDimensions(brand, miyukiShape, cellSize);
+  const orientation = w >= h ? 'landscape' : 'portrait';
+  const { w: cellW, h: cellH } = getAspectCellDimensions(brand, miyukiShape, cellSize, orientation);
   const canvas = document.createElement('canvas');
   canvas.width = w * cellW;
   canvas.height = h * cellH;
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const radius = getBeadRadius(brand, miyukiShape, cellW, cellH);
+  const radius = getAspectBeadRadius(brand, miyukiShape, cellW, cellH);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const code = grid[y][x];
@@ -176,7 +149,7 @@ export function useThumbnail(
       setUrl('');
       return;
     }
-    const { w: cellW, h: cellH } = getCellDimensions(brand, miyukiShape, 10);
+    const { w: cellW, h: cellH } = getAspectCellDimensions(brand, miyukiShape, 10);
     const aspect = (w * cellW) / (h * cellH);
     let baseSize: number;
     if (aspect >= 1) {

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { BeadColor, Brand, MiyukiShape, ProjectType, StitchType } from '@/beads';
 import { findColor } from '@/beads';
+import { getCellDimensions as getAspectCellDimensions, getBeadRadius as getAspectBeadRadius, getOrientation } from '@/beads/aspect';
 import { textToCells } from '@/lib/oldEnglishFont';
 import { FONT_LIBRARIES, type FontLibraryName } from '@/lib/oldEnglishFont';
 
@@ -234,11 +235,11 @@ export function EditorCanvas({
       else if (e.key === 'i') setTool('eyedropper');
       else if (e.key === 'l') setTool('line');
       else if (e.key === 'r') setTool('rect');
-      else if (e.key === 'o' && projectType === 'freehand') onToggleOrientation();
+      else if (e.key === 'o' && projectType === 'freehand' && brand === 'miyuki' && miyukiShape === 'delica') onToggleOrientation();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, onToggleOrientation, projectType]);
+  }, [undo, redo, onToggleOrientation, projectType, brand, miyukiShape]);
 
   const handlePointerDown = (x: number, y: number, e: React.PointerEvent) => {
     e.preventDefault();
@@ -304,36 +305,20 @@ export function EditorCanvas({
     return new Set(preview.map(([x, y]) => `${x},${y}`));
   }, [preview, selectedColor]);
 
+  const orientation = getOrientation(width, height);
   const cellSize = useMemo(() => {
-    const isRocailles = brand === 'miyuki' && miyukiShape === 'rocailles';
-    const isDelica = brand === 'miyuki' && miyukiShape === 'delica';
     if (isLoom) {
-      const cw = Math.floor(Math.min(640 / width, 28));
-      // Rocailles: portrait rounded square — slightly taller than wide
-      // Delica: landscape rectangle — wider than tall (w:h ≈ 4:3)
-      if (isRocailles) return { w: cw, h: Math.round(cw * 1.2) };
-      if (isDelica)    return { w: cw, h: Math.round(cw * 0.75) };
-      return { w: cw, h: cw };
+      const base = Math.floor(Math.min(640 / width, 28));
+      return getAspectCellDimensions(brand, miyukiShape, base, orientation);
     }
-    const cw = Math.floor(Math.min(640 / width, 520 / height, 32));
-    if (isRocailles) return { w: cw, h: Math.round(cw * 1.2) };
-    if (isDelica)    return { w: cw, h: Math.round(cw * 0.75) };
-    return { w: cw, h: cw };
-  }, [width, height, isLoom, brand, miyukiShape]);
+    const base = Math.floor(Math.min(640 / width, 520 / height, 32));
+    return getAspectCellDimensions(brand, miyukiShape, base, orientation);
+  }, [width, height, isLoom, brand, miyukiShape, orientation]);
 
   const cellW = Math.round(cellSize.w * zoom);
   const cellH = Math.round(cellSize.h * zoom);
 
-  // Rocailles: rounded square — generous but not full radius
-  // Delica: rounded rectangle — moderate corner radius
-  const beadRadius: string | number =
-    brand === 'miyuki' && miyukiShape === 'rocailles'
-      ? '38%'
-      : brand === 'miyuki' && miyukiShape === 'delica'
-      ? Math.round(Math.min(cellW, cellH) * 0.3)
-      : brand === 'toho'
-      ? Math.floor(cellW / 3)
-      : 2;
+  const beadRadius = getAspectBeadRadius(brand, miyukiShape, cellW, cellH);
 
   const isPeyote = stitch === 'peyote';
   const halfCellW = Math.floor(cellW / 2);
@@ -419,7 +404,7 @@ export function EditorCanvas({
           )
         )}
         <div className="w-px h-6 bg-stone-200 mx-1" />
-        {projectType === 'freehand' && (
+        {projectType === 'freehand' && brand === 'miyuki' && miyukiShape === 'delica' && (
           <button
             onClick={onToggleOrientation}
             className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition ${
