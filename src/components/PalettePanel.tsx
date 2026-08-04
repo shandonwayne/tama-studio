@@ -79,6 +79,9 @@ export function PalettePanel({
     return BEAD_TYPE_ORDER.filter((t) => set.has(t));
   }, [colors]);
 
+  const showTypeFilter = brand !== 'other' && availableTypes.length > 1;
+  const showGrouped = activeType === 'All' && showTypeFilter;
+
   const filtered = useMemo(() => {
     let result = colors;
     if (activeType !== 'All') {
@@ -187,9 +190,6 @@ export function PalettePanel({
       )}
     </button>
   );
-
-  const showTypeFilter = brand !== 'other' && availableTypes.length > 1;
-  const showGrouped = activeType === 'All' && showTypeFilter;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
