@@ -3,7 +3,6 @@ import {
   Brush,
   Eraser,
   PaintBucket,
-  Pipette,
   Minus,
   Square,
   Undo2,
@@ -22,7 +21,7 @@ import { getCellDimensions as getAspectCellDimensions, getBeadRadius as getAspec
 import { textToCells } from '@/lib/oldEnglishFont';
 import { FONT_LIBRARIES, type FontLibraryName } from '@/lib/oldEnglishFont';
 
-type Tool = 'paint' | 'erase' | 'fill' | 'eyedropper' | 'line' | 'rect';
+type Tool = 'paint' | 'erase' | 'fill' | 'line' | 'rect';
 type RectMode = 'filled' | 'outline';
 
 interface EditorCanvasProps {
@@ -40,10 +39,12 @@ interface EditorCanvasProps {
   onGridChange: (grid: (string | null)[][]) => void;
   onToggleOrientation: () => void;
   onGrowRows: (count: number) => void;
+  onGrowCols: (count: number) => void;
   textMode: boolean;
   selectedLetter: string | null;
   fontLibrary: FontLibraryName;
   selectedColorHex: string | null;
+  onPickColor?: (code: string) => void;
 }
 
 const MAX_HISTORY = 60;
@@ -64,10 +65,12 @@ export function EditorCanvas({
   onGridChange,
   onToggleOrientation,
   onGrowRows,
+  onGrowCols,
   textMode,
   selectedLetter,
   fontLibrary,
   selectedColorHex,
+  onPickColor,
 }: EditorCanvasProps) {
   const [tool, setTool] = useState<Tool>('paint');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -78,6 +81,7 @@ export function EditorCanvas({
   const [zoom, setZoom] = useState(1);
   const [rectMode, setRectMode] = useState<RectMode>('outline');
   const [rectHover, setRectHover] = useState(false);
+  const [hoverEdge, setHoverEdge] = useState<{ left: boolean; bottom: boolean }>({ left: false, bottom: false });
 
   const historyRef = useRef<(string | null)[][][]>([]);
   const futureRef = useRef<(string | null)[][][]>([]);
@@ -126,11 +130,6 @@ export function EditorCanvas({
         if (next[y]?.[x] === null) return;
         setCell(x, y, null, next);
         onGridChange(next);
-      } else if (tool === 'eyedropper') {
-        const code = grid[y]?.[x];
-        if (code) {
-          window.dispatchEvent(new CustomEvent('beadpick', { detail: code }));
-        }
       } else if (tool === 'fill') {
         const next = cloneGrid();
         floodFill(next, x, y, selectedColor, width, next.length);
@@ -210,7 +209,6 @@ export function EditorCanvas({
       } else if (e.key === 'b') setTool('paint');
       else if (e.key === 'e') setTool('erase');
       else if (e.key === 'g') setTool('fill');
-      else if (e.key === 'i') setTool('eyedropper');
       else if (e.key === 'l') setTool('line');
       else if (e.key === 'r') setTool('rect');
       else if (e.key === 'o' && projectType === 'freehand' && brand === 'miyuki' && miyukiShape === 'delica') onToggleOrientation();
@@ -351,10 +349,8 @@ export function EditorCanvas({
     { id: 'paint', icon: <Brush className="w-4 h-4" />, label: 'Paint', key: 'B' },
     { id: 'erase', icon: <Eraser className="w-4 h-4" />, label: 'Erase', key: 'E' },
     { id: 'fill', icon: <PaintBucket className="w-4 h-4" />, label: 'Fill', key: 'G' },
-    { id: 'eyedropper', icon: <Pipette className="w-4 h-4" />, label: 'Pick', key: 'I' },
     { id: 'line', icon: <Minus className="w-4 h-4" />, label: 'Line', key: 'L' },
     { id: 'rect', icon: <Square className="w-4 h-4" />, label: 'Rect', key: 'R' },
-
   ];
 
   const canUndo = historyRef.current.length > 0;
@@ -546,9 +542,42 @@ export function EditorCanvas({
         }}
       >
         <div
-          className="border border-stone-200 rounded-lg overflow-hidden shadow-sm bg-white inline-block"
-          onPointerLeave={handlePointerLeave}
+          className="relative inline-block"
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const relX = e.clientX - rect.left;
+            const relY = e.clientY - rect.top;
+            setHoverEdge({
+              left: relX < 24,
+              bottom: relY > rect.height - 24,
+            });
+          }}
+          onMouseLeave={() => setHoverEdge({ left: false, bottom: false })}
         >
+          {/* Add column button — appears on hover at the left edge */}
+          {hoverEdge.left && (
+            <button
+              onClick={() => onGrowCols(1)}
+              title="Add column"
+              className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-amber-500 text-white shadow-lg hover:bg-amber-600 hover:scale-110 flex items-center justify-center transition"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          )}
+          {/* Add row button — appears on hover at the bottom edge */}
+          {hoverEdge.bottom && (
+            <button
+              onClick={() => onGrowRows(1)}
+              title="Add row"
+              className="absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-1/2 z-20 w-7 h-7 rounded-full bg-amber-500 text-white shadow-lg hover:bg-amber-600 hover:scale-110 flex items-center justify-center transition"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          )}
+          <div
+            className="border border-stone-200 rounded-lg overflow-hidden shadow-sm bg-white inline-block"
+            onPointerLeave={handlePointerLeave}
+          >
           {displayGrid.map((row, y) => {
             const offset = isPeyote && y % 2 === 1 ? halfCellW : 0;
             return (
@@ -629,6 +658,7 @@ export function EditorCanvas({
               </div>
             );
           })}
+        </div>
         </div>
       </div>
     </div>

@@ -74,16 +74,17 @@ export default function App() {
     else if (customColors.length > 0) setSelectedColor(customColors[0].code);
   }, [config?.brand, config?.miyukiShape]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Eyedropper: listen for picks from the canvas
-  useEffect(() => {
-    const handler = (e: Event) => {
-      setSelectedColor((e as CustomEvent<string>).detail);
-      setToast('Color picked');
-      setTimeout(() => setToast(null), 1200);
-    };
-    window.addEventListener('beadpick', handler);
-    return () => window.removeEventListener('beadpick', handler);
-  }, []);
+  const handleGrowCols = (count: number) => {
+    setGrid((prev) =>
+      prev.map((row) => [...row, ...Array<string | null>(count).fill(null)])
+    );
+    setRotations((prev) =>
+      prev.map((row) => [...row, ...Array<number>(count).fill(0)])
+    );
+    setConfig((prev) =>
+      prev ? { ...prev, width: prev.width + count } : prev
+    );
+  };
 
   const handleStart = (c: ProjectConfig) => {
     setConfig(c);
@@ -461,6 +462,12 @@ export default function App() {
               onGridChange={setGrid}
               onToggleOrientation={handleToggleOrientation}
               onGrowRows={handleGrowRows}
+              onGrowCols={handleGrowCols}
+              onPickColor={(code) => {
+                setSelectedColor(code);
+                setToast('Color picked');
+                setTimeout(() => setToast(null), 1200);
+              }}
               textMode={leftTab === 'text'}
               selectedLetter={selectedLetter}
               fontLibrary={fontLibrary}
@@ -479,6 +486,11 @@ export default function App() {
                 brand={config.brand}
                 miyukiShape={miyukiShape}
                 customColors={customColors}
+                onPickColor={(code) => {
+                  setSelectedColor(code);
+                  setToast('Color picked');
+                  setTimeout(() => setToast(null), 1200);
+                }}
               />
             </div>
           )}

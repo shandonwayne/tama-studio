@@ -9,6 +9,7 @@ interface BeadCountPanelProps {
   brand: Brand;
   miyukiShape: MiyukiShape;
   customColors: BeadColor[];
+  onPickColor?: (code: string) => void;
 }
 
 interface CountRow {
@@ -23,6 +24,7 @@ export function BeadCountPanel({
   brand,
   miyukiShape,
   customColors,
+  onPickColor,
 }: BeadCountPanelProps) {
   const { rows, total, colorMap } = useMemo(() => {
     const map = new Map<string, number>();
@@ -166,7 +168,9 @@ export function BeadCountPanel({
               {rows.map((r) => (
                 <tr
                   key={r.code}
-                  className="border-b border-stone-50 hover:bg-amber-50/40 transition"
+                  onClick={() => onPickColor?.(r.code)}
+                  className={`border-b border-stone-50 transition ${onPickColor ? 'cursor-pointer hover:bg-amber-50/60' : 'hover:bg-amber-50/40'}`}
+                  title={onPickColor ? 'Click to select this color' : undefined}
                 >
                   <td className="py-2 pl-3 pr-3">
                     <div className="flex items-center gap-2">

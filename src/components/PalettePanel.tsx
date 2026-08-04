@@ -341,11 +341,7 @@ export function PalettePanel({
                 {displayColor.code}
               </p>
               <p className="text-xs text-stone-500 truncate">
-                {hovered ? (
-                  <span className="text-amber-600">Hovering — {shortName(displayColor)}</span>
-                ) : (
-                  shortName(displayColor)
-                )}
+                {shortName(displayColor)}
               </p>
             </div>
           </div>
