@@ -136,7 +136,7 @@ export function EditorCanvas({
         floodFill(next, x, y, selectedColor, width, next.length);
         onGridChange(next);
         maybeGrow(y);
-      } else if (tool === 'line' || tool === 'rect') {
+      } else if (tool === 'rect') {
         setStartCell([x, y]);
       }
     },
@@ -160,9 +160,6 @@ export function EditorCanvas({
         const font = FONT_LIBRARIES[fontLibrary];
         const cells = textToCells(selectedLetter, textPreviewPos[0], textPreviewPos[1], font, 0);
         setPreview(cells);
-      } else if (tool === 'line' && startCell) {
-        const cells = bresenham(startCell[0], startCell[1], x, y);
-        setPreview(cells);
       } else if (tool === 'rect' && startCell) {
         const cells = rectCells(startCell[0], startCell[1], x, y, rectMode);
         setPreview(cells);
@@ -177,12 +174,9 @@ export function EditorCanvas({
         setTextPreviewPos(null);
         setPreview(null);
       }
-      if ((tool === 'line' || tool === 'rect') && startCell) {
+      if (tool === 'rect' && startCell) {
         const next = cloneGrid();
-        const cells =
-          tool === 'line'
-            ? bresenham(startCell[0], startCell[1], x, y)
-            : rectCells(startCell[0], startCell[1], x, y, rectMode);
+        const cells = rectCells(startCell[0], startCell[1], x, y, rectMode);
         if (selectedColor) {
           cells.forEach(([cx, cy]) => setCell(cx, cy, selectedColor, next));
         }
@@ -236,10 +230,19 @@ export function EditorCanvas({
       else if (e.key === 'l') setTool('line');
       else if (e.key === 'r') setTool('rect');
       else if (e.key === 'o' && projectType === 'freehand' && brand === 'miyuki' && miyukiShape === 'delica') onToggleOrientation();
+      else if (e.key === 'Escape' && tool === 'line' && startCell) {
+        setStartCell(null);
+        setPreview(null);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, onToggleOrientation, projectType, brand, miyukiShape]);
+  }, [undo, redo, onToggleOrientation, projectType, brand, miyukiShape, tool, startCell]);
+
+  useEffect(() => {
+    setStartCell(null);
+    setPreview(null);
+  }, [tool]);
 
   const handlePointerDown = (x: number, y: number, e: React.PointerEvent) => {
     e.preventDefault();
@@ -253,6 +256,27 @@ export function EditorCanvas({
       onGridChange(next);
       maybeGrow(y);
       setTextPreviewPos(null);
+      setPreview(null);
+      return;
+    }
+    if (tool === 'line') {
+      if (!startCell) {
+        setStartCell([x, y]);
+        setPreview([[x, y]]);
+        return;
+      }
+      if (!selectedColor) {
+        setStartCell(null);
+        setPreview(null);
+        return;
+      }
+      snapshotBefore();
+      const next = cloneGrid();
+      const cells = bresenham(startCell[0], startCell[1], x, y);
+      cells.forEach(([cx, cy]) => setCell(cx, cy, selectedColor, next));
+      onGridChange(next);
+      maybeGrow(y);
+      setStartCell(null);
       setPreview(null);
       return;
     }
@@ -272,6 +296,11 @@ export function EditorCanvas({
       setPreview(cells);
       return;
     }
+    if (tool === 'line' && startCell && !isDrawing) {
+      const cells = bresenham(startCell[0], startCell[1], x, y);
+      setPreview(cells);
+      return;
+    }
     if (!isDrawing) return;
     continueTool(x, y);
   };
@@ -279,6 +308,9 @@ export function EditorCanvas({
   const handlePointerLeave = () => {
     if (textMode && !isDrawing) {
       setTextPreviewPos(null);
+      setPreview(null);
+    }
+    if (tool === 'line' && startCell && !isDrawing) {
       setPreview(null);
     }
   };
@@ -595,6 +627,9 @@ export function EditorCanvas({
                             borderRadius: beadRadius,
                           }}
                         />
+                      )}
+                      {tool === 'line' && startCell && startCell[0] === x && startCell[1] === y && (
+                        <div className="absolute inset-0 pointer-events-none border-2 border-amber-500 rounded-sm animate-pulse" />
                       )}
                     </div>
                   );
