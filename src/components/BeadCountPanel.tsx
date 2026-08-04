@@ -78,8 +78,8 @@ export function BeadCountPanel({
   const previewPixelShape = isRocailles || isDelica ? 'bead' : 'square';
 
   // Use an explicit width×height for the preview grid based on cell aspect
-  const previewMaxW = 220;
-  const previewMaxH = 110;
+  const previewMaxW = 260;
+  const previewMaxH = 220;
   const totalW = cols * cellAspect.w;
   const totalH = gridRows * cellAspect.h;
   const scaleW = previewMaxW / totalW;
@@ -106,7 +106,7 @@ export function BeadCountPanel({
         <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wide mb-1.5">
           Preview
         </p>
-        <div className="rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center" style={{ maxHeight: 120, minHeight: 60 }}>
+        <div className="rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center" style={{ maxHeight: 240, minHeight: 100 }}>
           {cols > 0 && gridRows > 0 ? (
             <div
               style={{
@@ -139,7 +139,7 @@ export function BeadCountPanel({
               )}
             </div>
           ) : (
-            <p className="text-xs text-stone-400 py-6">Nothing to preview</p>
+            <p className="text-xs text-stone-400 py-10">Nothing to preview</p>
           )}
         </div>
       </div>

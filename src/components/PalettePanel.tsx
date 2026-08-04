@@ -5,6 +5,41 @@ import type { BeadColor, BeadType, Brand, MiyukiShape } from '@/beads';
 import { getBrandColors, getBeadType, BEAD_TYPE_ORDER, shortName } from '@/beads';
 import { ColorSpectrumPicker } from './ColorSpectrumPicker';
 
+// Sort colors by hue (rainbow order), then by lightness, then by saturation.
+// Neutrals (very low saturation) sort to the end.
+function hueSortKey(hex: string): [number, number, number] {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  const lightness = (max + min) / 2;
+  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+  let hue = 0;
+  if (delta !== 0) {
+    if (max === r) hue = ((g - b) / delta) % 6;
+    else if (max === g) hue = (b - r) / delta + 2;
+    else hue = (r - g) / delta + 4;
+    hue *= 60;
+    if (hue < 0) hue += 360;
+  }
+  // Neutrals (sat < 0.08) get hue 370 so they sort after all chromatic colors
+  const hueBucket = saturation < 0.08 ? 370 : hue;
+  return [hueBucket, lightness, saturation];
+}
+
+function sortColorsByHue(list: BeadColor[]): BeadColor[] {
+  return [...list].sort((a, b) => {
+    const [ha, la, sa] = hueSortKey(a.hex);
+    const [hb, lb, sb] = hueSortKey(b.hex);
+    if (ha !== hb) return ha - hb;
+    if (la !== lb) return la - lb;
+    return sb - sa;
+  });
+}
+
 interface PalettePanelProps {
   brand: Brand;
   miyukiShape: MiyukiShape;
@@ -56,8 +91,24 @@ export function PalettePanel({
           c.code.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
       );
     }
+    // Sort by hue within each type bucket (or globally if not grouped)
+    if (showGrouped) {
+      // Sort each bucket separately
+      const buckets: Record<string, BeadColor[]> = {};
+      for (const c of result) {
+        const t = getBeadType(c);
+        (buckets[t] ??= []).push(c);
+      }
+      for (const t of Object.keys(buckets)) {
+        buckets[t] = sortColorsByHue(buckets[t]);
+      }
+      // Reassemble in BEAD_TYPE_ORDER
+      result = BEAD_TYPE_ORDER.flatMap((t) => buckets[t] ?? []);
+    } else {
+      result = sortColorsByHue(result);
+    }
     return result;
-  }, [colors, query, activeType]);
+  }, [colors, query, activeType, showGrouped]);
 
   // After the tooltip mounts, measure it and compute a position that
   // keeps it fully inside the viewport.
