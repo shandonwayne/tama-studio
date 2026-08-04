@@ -106,6 +106,66 @@ export function renderGridToCanvas(
   return canvas;
 }
 
+export interface ProjectFile {
+  app: 'tama-studio';
+  version: 1;
+  savedAt: string;
+  name: string;
+  projectType: string;
+  brand: string;
+  miyukiShape: string | null;
+  stitch: string;
+  width: number;
+  height: number;
+  grid: (string | null)[][];
+  rotations: number[][];
+  customColors: BeadColor[];
+}
+
+export function downloadProjectFile(
+  name: string,
+  projectType: string,
+  brand: string,
+  miyukiShape: string | null,
+  stitch: string,
+  width: number,
+  height: number,
+  grid: (string | null)[][],
+  rotations: number[][],
+  customColors: BeadColor[],
+) {
+  const data: ProjectFile = {
+    app: 'tama-studio',
+    version: 1,
+    savedAt: new Date().toISOString(),
+    name,
+    projectType,
+    brand,
+    miyukiShape,
+    stitch,
+    width,
+    height,
+    grid,
+    rotations,
+    customColors,
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '_') || 'project'}.tama.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function parseProjectFile(text: string): ProjectFile {
+  const parsed = JSON.parse(text);
+  if (!parsed || parsed.app !== 'tama-studio' || !Array.isArray(parsed.grid)) {
+    throw new Error('Not a valid Tama Studio project file.');
+  }
+  return parsed as ProjectFile;
+}
+
 export function useExportPNG() {
   const linkRef = useRef<HTMLAnchorElement | null>(null);
   if (!linkRef.current && typeof document !== 'undefined') {
