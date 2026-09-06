@@ -91,6 +91,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
   const [widthStr, setWidthStr] = useState('12');
   const [heightStr, setHeightStr] = useState('12');
   const [name, setName] = useState('UNTITLED');
+  const [nameFocused, setNameFocused] = useState(false);
   const [dots] = useState<Record<string, string>>(makeInitialDots);
   const [selectedDots, setSelectedDots] = useState<string[]>([]);
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
@@ -185,9 +186,19 @@ export function StartScreen({ onStart }: StartScreenProps) {
             <input
               type="text"
               value={name}
+              onFocus={() => {
+                setNameFocused(true);
+                if (name === 'UNTITLED') setName('');
+              }}
+              onBlur={() => {
+                setNameFocused(false);
+                if (!name.trim()) setName('UNTITLED');
+              }}
               onChange={(event) => setName(event.target.value.toUpperCase())}
               maxLength={60}
-              className="w-full rounded-24px bg-white px-5 py-3.5 text-center font-fredoka text-base font-bold uppercase tracking-[0.07em] text-tama-burgundy outline-none ring-2 ring-transparent transition focus:ring-tama-lavender"
+              className={`w-full rounded-24px bg-white px-5 py-3.5 text-center font-fredoka text-base font-bold uppercase tracking-[0.07em] outline-none ring-2 ring-transparent transition focus:ring-tama-lavender ${
+                nameFocused ? 'text-tama-burgundy' : 'text-tama-lavender'
+              }`}
             />
           </QuestionCard>
 
