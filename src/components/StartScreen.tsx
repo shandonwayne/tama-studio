@@ -310,7 +310,7 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-24px px-2.5 py-2 text-left font-fredoka text-base font-bold uppercase tracking-[0.07em] leading-tight transition-all ${
+      className={`flex items-center gap-2 rounded-24px px-[20px] py-[18px] text-left font-fredoka text-base font-bold uppercase tracking-[0.07em] leading-tight transition-all ${
         active ? 'bg-tama-burgundy text-white ring-2 ring-tama-red/50' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
       }`}
     >
@@ -339,7 +339,7 @@ function DimInput({
   return (
     <div className="group relative">
       <label
-        className={`flex items-center justify-between gap-1 rounded-24px pl-3 pr-1.5 py-1.5 font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
+        className={`flex items-center justify-between gap-1 rounded-24px pl-[22px] pr-[17.5px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
           disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
         }`}
       >
