@@ -5,7 +5,7 @@ import { tohoColors } from './toho';
 
 export type { BeadColor };
 export type Brand = 'miyuki' | 'toho' | 'other';
-export type ProjectType = 'loom' | 'freehand';
+export type ProjectType = 'loom' | 'freehand' | 'circle';
 export type MiyukiShape = 'delica' | 'rocailles';
 export type StitchType = 'brick' | 'peyote';
 

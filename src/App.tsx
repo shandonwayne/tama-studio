@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { StartScreen } from '@/components/StartScreen';
 import { EditorCanvas } from '@/components/EditorCanvas';
+import { CircleEditorCanvas } from '@/components/CircleEditorCanvas';
 import { PalettePanel } from '@/components/PalettePanel';
 import { BeadCountPanel } from '@/components/BeadCountPanel';
 
@@ -43,6 +44,17 @@ function emptyGrid(w: number, h: number): (string | null)[][] {
 
 function emptyRotations(w: number, h: number): number[][] {
   return Array.from({ length: h }, () => Array<number>(w).fill(0));
+}
+
+function emptyCircleGrid(diameter: number): (string | null)[][] {
+  const numRings = Math.max(1, Math.ceil(diameter / 2));
+  const rings: (string | null)[][] = [];
+  for (let r = 0; r < numRings; r++) {
+    const circumference = Math.max(1, Math.ceil(2 * Math.PI * (r + 0.5)));
+    const count = Math.max(1, Math.ceil(circumference / 2));
+    rings.push(Array<string | null>(count).fill(null));
+  }
+  return rings;
 }
 
 export default function App() {
@@ -86,10 +98,17 @@ export default function App() {
     );
   };
 
+  const isCircle = config?.projectType === 'circle';
+
   const handleStart = (c: ProjectConfig) => {
     setConfig(c);
-    setGrid(emptyGrid(c.width, c.height));
-    setRotations(emptyRotations(c.width, c.height));
+    if (c.projectType === 'circle') {
+      setGrid(emptyCircleGrid(Math.min(c.width, c.height)));
+      setRotations(emptyCircleGrid(Math.min(c.width, c.height)).map((row) => row.map(() => 0)));
+    } else {
+      setGrid(emptyGrid(c.width, c.height));
+      setRotations(emptyRotations(c.width, c.height));
+    }
   };
 
   const handleGrowRows = (count: number) => {
@@ -175,7 +194,7 @@ export default function App() {
       const brand = (['miyuki', 'toho', 'other'].includes(f.brand) ? f.brand : 'other') as Brand;
       const shape: MiyukiShape = f.miyukiShape === 'rocailles' ? 'rocailles' : 'delica';
       const stitch: StitchType = f.stitch === 'peyote' ? 'peyote' : 'brick';
-      const projectType = (f.projectType === 'loom' || f.projectType === 'freehand' ? f.projectType : 'freehand') as ProjectType;
+      const projectType = (f.projectType === 'loom' || f.projectType === 'circle' || f.projectType === 'freehand' ? f.projectType : 'freehand') as ProjectType;
       setConfig({
         projectType,
         brand,
@@ -256,7 +275,7 @@ export default function App() {
               ) : (
                 <Sparkles className="w-3 h-3" />
               )}
-              {config.projectType === 'loom' ? 'Loom' : 'Freehand'}
+              {config.projectType === 'loom' ? 'Loom' : config.projectType === 'circle' ? 'Circle' : 'Freehand'}
             </span>
             {/* Brand badge — click to convert */}
             <div className="relative">
@@ -447,36 +466,51 @@ export default function App() {
           </div>
           {/* Canvas */}
           <div className="order-1 lg:order-2 min-h-[360px] min-w-0 overflow-hidden">
-            <EditorCanvas
-              grid={grid}
-              rotations={rotations}
-              onRotationsChange={setRotations}
-              width={config.width}
-              height={config.height}
-              brand={config.brand}
-              miyukiShape={miyukiShape}
-              projectType={config.projectType}
-              stitch={config.stitch}
-              customColors={customColors}
-              selectedColor={selectedColor}
-              onGridChange={setGrid}
-              onToggleOrientation={handleToggleOrientation}
-              onGrowRows={handleGrowRows}
-              onGrowCols={handleGrowCols}
-              onPickColor={(code) => {
-                setSelectedColor(code);
-                setToast('Color picked');
-                setTimeout(() => setToast(null), 1200);
-              }}
-              textMode={leftTab === 'text'}
-              selectedLetter={selectedLetter}
-              fontLibrary={fontLibrary}
-              selectedColorHex={
-                findColor(config.brand, selectedColor ?? '', miyukiShape)?.hex
-                ?? customColors.find((c) => c.code === selectedColor)?.hex
-                ?? null
-              }
-            />
+            {isCircle ? (
+              <CircleEditorCanvas
+                grid={grid}
+                rotations={rotations}
+                onRotationsChange={setRotations}
+                width={config.width}
+                height={config.height}
+                brand={config.brand}
+                miyukiShape={miyukiShape}
+                customColors={customColors}
+                selectedColor={selectedColor}
+                onGridChange={setGrid}
+              />
+            ) : (
+              <EditorCanvas
+                grid={grid}
+                rotations={rotations}
+                onRotationsChange={setRotations}
+                width={config.width}
+                height={config.height}
+                brand={config.brand}
+                miyukiShape={miyukiShape}
+                projectType={config.projectType}
+                stitch={config.stitch}
+                customColors={customColors}
+                selectedColor={selectedColor}
+                onGridChange={setGrid}
+                onToggleOrientation={handleToggleOrientation}
+                onGrowRows={handleGrowRows}
+                onGrowCols={handleGrowCols}
+                onPickColor={(code) => {
+                  setSelectedColor(code);
+                  setToast('Color picked');
+                  setTimeout(() => setToast(null), 1200);
+                }}
+                textMode={leftTab === 'text'}
+                selectedLetter={selectedLetter}
+                fontLibrary={fontLibrary}
+                selectedColorHex={
+                  findColor(config.brand, selectedColor ?? '', miyukiShape)?.hex
+                  ?? customColors.find((c) => c.code === selectedColor)?.hex
+                  ?? null
+                }
+              />
+            )}
           </div>
           {/* Bead list — hideable right rail */}
           {rightRailOpen && (

@@ -40,7 +40,7 @@ const CANVAS_CHOICES: CanvasChoice[] = [
   { id: 'loom', label: 'Loom', icon: '/Loom-svg.svg', bg: 'bg-tama-sky', projectType: 'loom', stitch: 'brick' },
   { id: 'square', label: 'Square Stitch', icon: '/squarestitch-svg.svg', bg: 'bg-tama-yellow', projectType: 'freehand', stitch: 'brick' },
   { id: 'brick', label: 'Brick Stitch', icon: '/brickstitch-svg.svg', bg: 'bg-tama-pink', projectType: 'freehand', stitch: 'peyote' },
-  { id: 'circle', label: 'Circle', icon: '/circle-svg.svg', bg: 'bg-tama-lavender', projectType: 'freehand', stitch: 'brick' },
+  { id: 'circle', label: 'Circle', icon: '/circle-svg.svg', bg: 'bg-tama-lavender', projectType: 'circle', stitch: 'peyote' },
 ];
 
 const BEAD_CHOICES: BeadChoice[] = [
@@ -99,7 +99,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
   const canvas = CANVAS_CHOICES.find((choice) => choice.id === canvasId) ?? CANVAS_CHOICES[0];
   const bead = BEAD_CHOICES.find((choice) => choice.id === beadId) ?? BEAD_CHOICES[0];
   const width = Math.max(1, Math.min(200, parseInt(widthStr, 10) || 1));
-  const height = Math.max(1, Math.min(200, parseInt(heightStr, 10) || 1));
+  const height = canvasId === 'circle' ? width : Math.max(1, Math.min(200, parseInt(heightStr, 10) || 1));
 
   const handleStart = () => {
     onStart({
@@ -223,8 +223,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
                 value={heightStr}
                 onChange={setHeightStr}
                 label="Height:"
-                disabled={canvasId === 'loom'}
-                tooltip="Loom auto-extends as you build, so height is set automatically."
+                disabled={canvasId === 'loom' || canvasId === 'circle'}
+                tooltip={canvasId === 'loom' ? 'Loom auto-extends as you build, so height is set automatically.' : 'Circle designs are round, so height matches width automatically.'}
               />
             </div>
           </QuestionCard>
