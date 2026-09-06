@@ -36,8 +36,12 @@ function buildSegments(points: Point[]): Segment[] {
     const particles: Particle[] = [];
     for (let j = 0; j <= particleCount; j += 1) {
       const progress = j / particleCount;
-      const x = a.x + (b.x - a.x) * progress;
-      const y = a.y + (b.y - a.y) * progress;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const distance = Math.hypot(dx, dy) || 1;
+      const sag = Math.sin(progress * Math.PI) * Math.min(30, distance * 0.2);
+      const x = a.x + dx * progress - (dy / distance) * sag;
+      const y = a.y + dy * progress + (dx / distance) * sag;
       particles.push({ x, y, ox: x, oy: y, pinned: j === 0 || j === particleCount });
     }
     segments.push({ particles, restLength });

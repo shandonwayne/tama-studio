@@ -241,10 +241,11 @@ export function StartScreen({ onStart }: StartScreenProps) {
       <section className="relative hidden min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-screen">
         <div
           ref={containerRef}
-          className="relative grid h-full w-full max-w-none flex-1 place-content-center gap-[6px] p-[60px]"
+          className="relative grid h-full w-full max-w-none flex-1 place-content-center gap-y-[6px] p-[60px]"
           style={{
             gridTemplateColumns: 'repeat(14, clamp(28px, 4vw, 40px))',
             gridTemplateRows: 'repeat(10, clamp(28px, 4vw, 40px))',
+            columnGap: '6.75px',
           }}
         >
           {stringPoints.length >= 2 && (
@@ -266,11 +267,13 @@ export function StartScreen({ onStart }: StartScreenProps) {
                 onMouseEnter={() => handleDotEnter(key)}
                 onMouseLeave={() => setHoveredDot(null)}
                 className="relative z-10 flex h-[clamp(28px,4vw,40px)] w-[clamp(28px,4vw,40px)] items-center justify-center rounded-full border-0 p-0 outline-none shadow-[inset_0_0_0_3px_rgba(255,255,255,0.18),inset_0_-3px_5px_rgba(0,0,0,0.18),0_2px_5px_rgba(0,0,0,0.2)] transition duration-200 hover:scale-125 focus:outline-none focus:ring-0"
-                style={{ backgroundColor: isHovered ? hoverColors[key] : color }}
+                style={{
+                  background: `radial-gradient(circle, transparent 0 7px, ${isHovered ? hoverColors[key] : color} 7.5px 100%)`,
+                }}
               >
                 <span
                   aria-hidden="true"
-                  className="h-2.5 w-2.5 rounded-full bg-transparent ring-2 ring-black/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)]"
+                  className="h-3.5 w-3.5 rounded-full border-2 border-black/20 bg-transparent"
                 />
               </button>
             );
@@ -386,7 +389,7 @@ function DimInput({
       {disabled && tooltip && (
         <span
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-tama-burgundy px-3 py-1.5 font-public text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
+          className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-[100px] -translate-x-1/2 rounded-2xl bg-tama-burgundy px-3 py-1.5 text-center font-public text-[11px] font-medium leading-tight text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
         >
           {tooltip}
         </span>
