@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { Brand, MiyukiShape, ProjectType, StitchType } from '@/beads';
 import { StringCanvas } from '@/components/StringCanvas';
 
@@ -292,11 +293,11 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
       type="button"
       onClick={onClick}
       title={choice.id === 'loom' ? 'The loom layout auto extends the grid as you build your design, no need to set a fixed height.' : undefined}
-      className={`relative flex min-h-[80px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-2.5 py-2.5 transition-all ${
+      className={`relative flex min-h-[128px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-2.5 py-2.5 transition-all ${
         active ? 'ring-2 ring-tama-burgundy ring-offset-1' : 'hover:brightness-95'
       }`}
     >
-      <span className="text-left font-fredoka text-[22px] font-bold uppercase tracking-[0.07em] leading-tight text-tama-burgundy">
+      <span className="text-left font-fredoka text-[22px] font-bold uppercase tracking-[0.07em] leading-[23.5px] text-tama-burgundy">
         {choice.label}
       </span>
       <img src={choice.icon} alt="" className="h-12 w-auto max-w-[58px]" />
@@ -332,14 +333,17 @@ function DimInput({
   disabled?: boolean;
   tooltip?: string;
 }) {
+  const clamp = (n: number) => Math.max(1, Math.min(200, n));
+  const step = (dir: 1 | -1) => onChange(String(clamp((parseInt(value, 10) || 1) + dir)));
+
   return (
     <div className="group relative">
       <label
-        className={`flex items-center justify-center gap-2 rounded-24px px-2.5 py-2.5 font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
+        className={`flex items-center justify-between gap-1 rounded-24px pl-3 pr-1.5 py-1.5 font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
           disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
         }`}
       >
-        {label}
+        <span className="shrink-0">{label}</span>
         <input
           type="number"
           min={1}
@@ -347,8 +351,28 @@ function DimInput({
           value={value}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          className="w-10 bg-transparent text-center text-base font-bold outline-none disabled:cursor-not-allowed"
+          className="w-8 bg-transparent text-center text-base font-bold outline-none [appearance:textfield] disabled:cursor-not-allowed [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
+        <span className="flex shrink-0 flex-col gap-0.5">
+          <button
+            type="button"
+            tabIndex={-1}
+            disabled={disabled}
+            onClick={() => step(1)}
+            className="flex h-4 w-6 items-center justify-center rounded-full bg-tama-burgundy/10 text-tama-burgundy transition hover:bg-tama-red hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-tama-burgundy/10 disabled:hover:text-tama-burgundy"
+          >
+            <ChevronUp className="h-3 w-3" strokeWidth={3} />
+          </button>
+          <button
+            type="button"
+            tabIndex={-1}
+            disabled={disabled}
+            onClick={() => step(-1)}
+            className="flex h-4 w-6 items-center justify-center rounded-full bg-tama-burgundy/10 text-tama-burgundy transition hover:bg-tama-red hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-tama-burgundy/10 disabled:hover:text-tama-burgundy"
+          >
+            <ChevronDown className="h-3 w-3" strokeWidth={3} />
+          </button>
+        </span>
       </label>
       {disabled && tooltip && (
         <span
