@@ -164,8 +164,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
   return (
     <main className="min-h-screen bg-tama-white text-tama-burgundy lg:flex">
       <section className="w-full bg-tama-white px-6 py-6 lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:max-w-[520px] lg:overflow-y-auto lg:px-6 lg:py-8 xl:px-6">
-        <div className="flex w-full flex-col gap-5">
-          <div className="flex justify-center pb-1">
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex justify-center">
             <img src="/Logo.svg" alt="Tama Studio" className="h-auto w-[112px]" />
           </div>
 
@@ -183,14 +183,14 @@ export function StartScreen({ onStart }: StartScreenProps) {
               }}
               onChange={(event) => setName(event.target.value.toUpperCase())}
               maxLength={60}
-              className={`w-full rounded-24px bg-white px-5 py-3.5 text-center font-fredoka text-base font-bold uppercase tracking-[0.07em] outline-none ring-2 ring-transparent transition focus:ring-tama-lavender ${
+              className={`w-full rounded-24px bg-white px-4 py-2.5 text-center font-fredoka text-base font-bold uppercase tracking-[0.07em] outline-none ring-2 ring-transparent transition focus:ring-tama-lavender ${
                 nameFocused ? 'text-tama-burgundy' : 'text-tama-lavender'
               }`}
             />
           </QuestionCard>
 
           <QuestionCard title="What type of canvas do you need?">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {CANVAS_CHOICES.map((choice) => (
                 <CanvasButton
                   key={choice.id}
@@ -203,7 +203,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
           </QuestionCard>
 
           <QuestionCard title="What kind of beads are you using?">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {BEAD_CHOICES.map((choice) => (
                 <BeadButton
                   key={choice.id}
@@ -216,20 +216,21 @@ export function StartScreen({ onStart }: StartScreenProps) {
           </QuestionCard>
 
           <QuestionCard title="Dimensions">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <DimInput value={widthStr} onChange={setWidthStr} label="Width:" />
               <DimInput
                 value={heightStr}
                 onChange={setHeightStr}
                 label="Height:"
                 disabled={canvasId === 'loom'}
+                tooltip="Loom auto-extends as you build, so height is set automatically."
               />
             </div>
           </QuestionCard>
 
           <button
             onClick={handleStart}
-            className="w-full rounded-24px bg-tama-red py-3.5 font-fredoka text-base font-bold uppercase tracking-[0.07em] text-white shadow-lg shadow-tama-red/25 transition hover:-translate-y-0.5 hover:bg-[#d92f31] active:translate-y-0"
+            className="w-full rounded-24px bg-tama-red py-2.5 font-fredoka text-base font-bold uppercase tracking-[0.07em] text-white shadow-lg shadow-tama-red/25 transition hover:-translate-y-0.5 hover:bg-[#d92f31] active:translate-y-0"
           >
             Start Designing
           </button>
@@ -276,8 +277,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
 function QuestionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-24px bg-tama-pale/90 p-4">
-      <h2 className="mb-3 text-center font-public text-xs font-black uppercase tracking-[0.08em] text-tama-burgundy/70">
+    <section className="rounded-24px bg-tama-pale/90 p-3">
+      <h2 className="mb-2 text-center font-public text-xs font-black uppercase tracking-[0.08em] text-tama-burgundy/70">
         {title}
       </h2>
       {children}
@@ -291,7 +292,7 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
       type="button"
       onClick={onClick}
       title={choice.id === 'loom' ? 'The loom layout auto extends the grid as you build your design, no need to set a fixed height.' : undefined}
-      className={`relative flex min-h-[96px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-3.5 py-3.5 transition-all ${
+      className={`relative flex min-h-[80px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-2.5 py-2.5 transition-all ${
         active ? 'ring-2 ring-tama-burgundy ring-offset-1' : 'hover:brightness-95'
       }`}
     >
@@ -308,7 +309,7 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-24px px-3.5 py-3 text-left font-fredoka text-base font-bold uppercase tracking-[0.07em] leading-tight transition-all ${
+      className={`flex items-center gap-2 rounded-24px px-2.5 py-2 text-left font-fredoka text-base font-bold uppercase tracking-[0.07em] leading-tight transition-all ${
         active ? 'bg-tama-burgundy text-white ring-2 ring-tama-red/50' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
       }`}
     >
@@ -323,28 +324,40 @@ function DimInput({
   onChange,
   label,
   disabled = false,
+  tooltip,
 }: {
   value: string;
   onChange: (value: string) => void;
   label: string;
   disabled?: boolean;
+  tooltip?: string;
 }) {
   return (
-    <label
-      className={`flex items-center justify-center gap-2 rounded-24px px-3 py-3.5 font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
-        disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
-      }`}
-    >
-      {label}
-      <input
-        type="number"
-        min={1}
-        max={200}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-10 bg-transparent text-center text-base font-bold outline-none disabled:cursor-not-allowed"
-      />
-    </label>
+    <div className="group relative">
+      <label
+        className={`flex items-center justify-center gap-2 rounded-24px px-2.5 py-2.5 font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
+          disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
+        }`}
+      >
+        {label}
+        <input
+          type="number"
+          min={1}
+          max={200}
+          value={value}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-10 bg-transparent text-center text-base font-bold outline-none disabled:cursor-not-allowed"
+        />
+      </label>
+      {disabled && tooltip && (
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-tama-burgundy px-3 py-1.5 font-public text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100"
+        >
+          {tooltip}
+        </span>
+      )}
+    </div>
   );
 }
