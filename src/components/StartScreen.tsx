@@ -300,7 +300,11 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
       <span className="text-left font-fredoka text-[22px] font-bold uppercase tracking-[0.07em] leading-[23.5px] text-tama-burgundy">
         {choice.label}
       </span>
-      <img src={choice.icon} alt="" className="h-12 w-auto max-w-[58px]" />
+      <img
+        src={choice.icon}
+        alt=""
+        className={choice.id === 'loom' ? 'my-[-10px] h-[calc(100%+20px)] w-auto max-w-[58px]' : 'h-12 w-auto max-w-[58px]'}
+      />
     </button>
   );
 }
