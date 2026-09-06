@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Brand, MiyukiShape, ProjectType, StitchType } from '@/beads';
+import { StringCanvas } from '@/components/StringCanvas';
 
 interface StartScreenProps {
   onStart: (config: {
@@ -82,10 +83,7 @@ function getHoverColor(color: string): string {
   return DOT_COLORS[(colorIndex + 1) % DOT_COLORS.length];
 }
 
-function getDotPoint(key: string): string {
-  const [row, column] = key.split('-').map(Number);
-  return `${column * 10 + 5},${row * 10 + 5}`;
-}
+
 
 export function StartScreen({ onStart }: StartScreenProps) {
   const [canvasId, setCanvasId] = useState<CanvasChoiceId>('loom');
@@ -96,6 +94,9 @@ export function StartScreen({ onStart }: StartScreenProps) {
   const [dots] = useState<Record<string, string>>(makeInitialDots);
   const [selectedDots, setSelectedDots] = useState<string[]>([]);
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0, active: false });
 
   const canvas = CANVAS_CHOICES.find((choice) => choice.id === canvasId) ?? CANVAS_CHOICES[0];
   const bead = BEAD_CHOICES.find((choice) => choice.id === beadId) ?? BEAD_CHOICES[0];
@@ -119,6 +120,58 @@ export function StartScreen({ onStart }: StartScreenProps) {
       current.includes(key) ? current.filter((selectedKey) => selectedKey !== key) : [...current, key],
     );
   };
+
+  const getDotCenter = useCallback(
+    (key: string): { x: number; y: number } | null => {
+      const container = containerRef.current;
+      const button = container?.querySelector<HTMLButtonElement>(`[data-dot-key="${key}"]`);
+      if (!container || !button) return null;
+      const containerRect = container.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      return {
+        x: buttonRect.left - containerRect.left + buttonRect.width / 2,
+        y: buttonRect.top - containerRect.top + buttonRect.height / 2,
+      };
+    },
+    [],
+  );
+
+  const stringPoints = selectedDots
+    .map(getDotCenter)
+    .filter((p): p is { x: number; y: number } => p !== null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      setContainerSize({ width: rect.width, height: rect.height });
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const handleMove = (event: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      mouseRef.current = {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+        active: true,
+      };
+    };
+    const handleLeave = () => {
+      mouseRef.current.active = false;
+    };
+    container.addEventListener('mousemove', handleMove);
+    container.addEventListener('mouseleave', handleLeave);
+    return () => {
+      container.removeEventListener('mousemove', handleMove);
+      container.removeEventListener('mouseleave', handleLeave);
+    };
+  }, []);
 
   return (
     <main className="min-h-screen bg-tama-white text-tama-burgundy lg:flex">
@@ -187,24 +240,22 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
       <section className="relative flex min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:h-screen lg:min-h-screen">
         <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(#ff9aaf_1px,transparent_1px)] [background-size:32px_32px]" />
-        <div className="relative grid h-full w-full max-w-none flex-1 grid-cols-[repeat(14,minmax(0,1fr))] grid-rows-[repeat(10,minmax(0,1fr))] place-items-center gap-0">
-          <svg
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full"
-            viewBox="0 0 140 100"
-            preserveAspectRatio="none"
-          >
-            {selectedDots.length > 1 && (
-              <polyline
-                points={selectedDots.map(getDotPoint).join(' ')}
-                fill="none"
-                stroke="#FF9AAF"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            )}
-          </svg>
+        <div
+          ref={containerRef}
+          className="relative grid h-full w-full max-w-none flex-1 gap-x-[15px] gap-y-[15px] place-items-center"
+          style={{
+            gridTemplateColumns: 'repeat(14, minmax(0, 1fr))',
+            gridTemplateRows: 'repeat(10, minmax(0, 1fr))',
+          }}
+        >
+          {stringPoints.length >= 2 && (
+            <StringCanvas
+              points={stringPoints}
+              width={containerSize.width}
+              height={containerSize.height}
+              mouseRef={mouseRef}
+            />
+          )}
           {Object.entries(dots).map(([key, color]) => {
             const isHovered = hoveredDot === key;
             return (
@@ -212,6 +263,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
                 key={key}
                 type="button"
                 aria-label={`Select bead ${key}`}
+                data-dot-key={key}
                 onClick={() => handleDotClick(key)}
                 onMouseEnter={() => setHoveredDot(key)}
                 onMouseLeave={() => setHoveredDot(null)}
