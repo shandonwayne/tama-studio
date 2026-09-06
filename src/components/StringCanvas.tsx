@@ -155,32 +155,45 @@ export const StringCanvas = memo(function StringCanvas({ points, width, height }
       animationRef.current = requestAnimationFrame(step);
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
+    const updateMouse = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = event.clientX - rect.left;
       mouse.y = event.clientY - rect.top;
-      if (isPointerOverString()) {
-        activeRef.current = true;
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = requestAnimationFrame(step);
-      }
     };
 
-    const handlePointerLeave = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
+    const handlePointerDown = (event: PointerEvent) => {
+      updateMouse(event);
+      if (!isPointerOverString()) return;
+      activeRef.current = true;
+      canvas.setPointerCapture(event.pointerId);
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = requestAnimationFrame(step);
     };
 
-    activeRef.current = true;
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!activeRef.current) return;
+      updateMouse(event);
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      activeRef.current = false;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      cancelAnimationFrame(animationRef.current);
+      draw();
+    };
+
     draw();
-    animationRef.current = requestAnimationFrame(step);
+    canvas.addEventListener('pointerdown', handlePointerDown);
     canvas.addEventListener('pointermove', handlePointerMove);
-    canvas.addEventListener('pointerleave', handlePointerLeave);
+    canvas.addEventListener('pointerup', handlePointerUp);
+    canvas.addEventListener('pointercancel', handlePointerUp);
     return () => {
       activeRef.current = false;
       cancelAnimationFrame(animationRef.current);
+      canvas.removeEventListener('pointerdown', handlePointerDown);
       canvas.removeEventListener('pointermove', handlePointerMove);
-      canvas.removeEventListener('pointerleave', handlePointerLeave);
+      canvas.removeEventListener('pointerup', handlePointerUp);
+      canvas.removeEventListener('pointercancel', handlePointerUp);
     };
   }, [points, width, height]);
 
