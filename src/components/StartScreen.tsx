@@ -268,12 +268,12 @@ export function StartScreen({ onStart }: StartScreenProps) {
                 onMouseLeave={() => setHoveredDot(null)}
                 className="relative z-10 flex h-[clamp(28px,4vw,40px)] w-[clamp(28px,4vw,40px)] items-center justify-center rounded-full border-0 p-0 outline-none shadow-[inset_0_0_0_3px_rgba(255,255,255,0.18),inset_0_-3px_5px_rgba(0,0,0,0.18),0_2px_5px_rgba(0,0,0,0.2)] transition duration-200 hover:scale-125 focus:outline-none focus:ring-0"
                 style={{
-                  background: `radial-gradient(circle, transparent 0 7px, ${isHovered ? hoverColors[key] : color} 7.5px 100%)`,
+                  background: `radial-gradient(circle, transparent 0 6px, ${isHovered ? hoverColors[key] : color} 6.5px 100%)`,
                 }}
               >
                 <span
                   aria-hidden="true"
-                  className="h-3.5 w-3.5 rounded-full border-2 border-black/20 bg-transparent"
+                  className="h-3 w-3 rounded-full border-2 border-black/20 bg-transparent"
                 />
               </button>
             );
@@ -351,7 +351,7 @@ function DimInput({
   return (
     <div className="group relative">
       <label
-        className={`flex items-center justify-between gap-1 rounded-24px px-[15px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
+        className={`flex items-center justify-between gap-1 rounded-full px-[15px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
           disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
         }`}
       >
