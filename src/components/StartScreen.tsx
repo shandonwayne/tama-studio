@@ -164,7 +164,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
   return (
     <main className="min-h-screen bg-tama-white text-tama-burgundy lg:flex">
-      <section className="w-full bg-tama-white px-6 py-6 lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:max-w-[520px] lg:overflow-y-auto lg:px-6 lg:py-8 xl:px-6">
+      <section className="w-full bg-tama-white px-6 py-6 lg:sticky lg:top-0 lg:h-screen lg:w-[calc(35%+55px)] lg:max-w-[575px] lg:overflow-y-auto lg:px-6 lg:py-8 xl:px-6">
         <div className="flex w-full flex-col gap-3">
           <div className="flex justify-center">
             <img src="/Logo.svg" alt="Tama Studio" className="h-auto w-[112px]" />
