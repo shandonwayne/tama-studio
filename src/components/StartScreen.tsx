@@ -77,13 +77,25 @@ function makeInitialDots(): Record<string, string> {
   return dots;
 }
 
+function getHoverColor(color: string): string {
+  const colorIndex = DOT_COLORS.indexOf(color);
+  return DOT_COLORS[(colorIndex + 1) % DOT_COLORS.length];
+}
+
+function getDotPoint(key: string): string {
+  const [row, column] = key.split('-').map(Number);
+  return `${column * 10 + 5},${row * 10 + 5}`;
+}
+
 export function StartScreen({ onStart }: StartScreenProps) {
   const [canvasId, setCanvasId] = useState<CanvasChoiceId>('loom');
   const [beadId, setBeadId] = useState<BeadChoiceId>('rocailles');
   const [widthStr, setWidthStr] = useState('12');
   const [heightStr, setHeightStr] = useState('12');
   const [name, setName] = useState('UNTITLED');
-  const [dots, setDots] = useState<Record<string, string>>(makeInitialDots);
+  const [dots] = useState<Record<string, string>>(makeInitialDots);
+  const [selectedDots, setSelectedDots] = useState<string[]>([]);
+  const [hoveredDot, setHoveredDot] = useState<string | null>(null);
 
   const canvas = CANVAS_CHOICES.find((choice) => choice.id === canvasId) ?? CANVAS_CHOICES[0];
   const bead = BEAD_CHOICES.find((choice) => choice.id === beadId) ?? BEAD_CHOICES[0];
@@ -103,12 +115,9 @@ export function StartScreen({ onStart }: StartScreenProps) {
   };
 
   const handleDotClick = (key: string) => {
-    setDots((current) => {
-      const currentColor = current[key];
-      const colorIndex = DOT_COLORS.indexOf(currentColor);
-      const nextColor = DOT_COLORS[(colorIndex + 1) % DOT_COLORS.length];
-      return { ...current, [key]: nextColor };
-    });
+    setSelectedDots((current) =>
+      current.includes(key) ? current.filter((selectedKey) => selectedKey !== key) : [...current, key],
+    );
   };
 
   return (
@@ -176,25 +185,42 @@ export function StartScreen({ onStart }: StartScreenProps) {
         </div>
       </section>
 
-      <section className="relative flex min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy px-6 py-14 sm:px-12 sm:py-16 lg:sticky lg:top-0 lg:h-screen lg:min-h-screen lg:px-16 lg:py-16 xl:px-24">
+      <section className="relative flex min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:h-screen lg:min-h-screen">
         <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(#ff9aaf_1px,transparent_1px)] [background-size:32px_32px]" />
-        <div className="relative grid w-full max-w-[780px] flex-1 content-center grid-cols-[repeat(14,minmax(0,1fr))] gap-x-2 gap-y-3 sm:gap-x-4 sm:gap-y-5 lg:gap-x-5 lg:gap-y-7 xl:gap-x-6 xl:gap-y-8">
-          {Object.entries(dots).map(([key, color]) => (
-            <button
-              key={key}
-              type="button"
-              aria-label={`Edit bead ${key}`}
-              onClick={() => handleDotClick(key)}
-              onMouseEnter={(event) => { event.currentTarget.style.backgroundColor = DOT_COLORS[Math.floor(Math.random() * DOT_COLORS.length)]; }}
-              onMouseLeave={(event) => { event.currentTarget.style.backgroundColor = dots[key]; }}
-              className="aspect-square w-full rounded-full transition duration-200 hover:scale-125 focus:outline-none focus:ring-2 focus:ring-white/80"
-              style={{ backgroundColor: color }}
-            />
-          ))}
+        <div className="relative grid h-full w-full max-w-none flex-1 grid-cols-[repeat(14,minmax(0,1fr))] grid-rows-[repeat(10,minmax(0,1fr))] place-items-center gap-0">
+          <svg
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full"
+            viewBox="0 0 140 100"
+            preserveAspectRatio="none"
+          >
+            {selectedDots.length > 1 && (
+              <polyline
+                points={selectedDots.map(getDotPoint).join(' ')}
+                fill="none"
+                stroke="#FF9AAF"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
+          </svg>
+          {Object.entries(dots).map(([key, color]) => {
+            const isHovered = hoveredDot === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-label={`Select bead ${key}`}
+                onClick={() => handleDotClick(key)}
+                onMouseEnter={() => setHoveredDot(key)}
+                onMouseLeave={() => setHoveredDot(null)}
+                className="z-10 h-[clamp(28px,4vw,40px)] w-[clamp(28px,4vw,40px)] rounded-full border-0 p-0 outline-none transition duration-200 hover:scale-125 focus:outline-none focus:ring-0"
+                style={{ backgroundColor: isHovered ? getHoverColor(color) : color }}
+              />
+            );
+          })}
         </div>
-        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-fredoka text-xs font-semibold uppercase tracking-[0.18em] text-tama-pink/70 sm:bottom-8">
-          Click a bead to play
-        </p>
       </section>
     </main>
   );
