@@ -158,7 +158,12 @@ export function StartScreen({ onStart }: StartScreenProps) {
           <QuestionCard title="Dimensions">
             <div className="grid grid-cols-2 gap-2">
               <DimInput value={widthStr} onChange={setWidthStr} label="Width:" />
-              <DimInput value={heightStr} onChange={setHeightStr} label="Height:" />
+              <DimInput
+                value={heightStr}
+                onChange={setHeightStr}
+                label="Height:"
+                disabled={canvasId === 'loom'}
+              />
             </div>
           </QuestionCard>
 
@@ -209,6 +214,7 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
     <button
       type="button"
       onClick={onClick}
+      title={choice.id === 'loom' ? 'The loom layout auto extends the grid as you build your design, no need to set a fixed height.' : undefined}
       className={`relative flex min-h-[92px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-3 py-3 transition-all ${
         active ? 'ring-2 ring-tama-burgundy ring-offset-1' : 'hover:brightness-95'
       }`}
@@ -236,17 +242,32 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
   );
 }
 
-function DimInput({ value, onChange, label }: { value: string; onChange: (value: string) => void; label: string }) {
+function DimInput({
+  value,
+  onChange,
+  label,
+  disabled = false,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+  disabled?: boolean;
+}) {
   return (
-    <label className="flex items-center justify-center gap-2 rounded-24px bg-white px-3 py-3 font-fredoka text-[10px] font-bold uppercase text-tama-burgundy">
+    <label
+      className={`flex items-center justify-center gap-2 rounded-24px px-3 py-3 font-fredoka text-[10px] font-bold uppercase transition ${
+        disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
+      }`}
+    >
       {label}
       <input
         type="number"
         min={1}
         max={200}
         value={value}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="w-8 bg-transparent text-center text-sm font-bold outline-none"
+        className="w-8 bg-transparent text-center text-sm font-bold outline-none disabled:cursor-not-allowed"
       />
     </label>
   );
