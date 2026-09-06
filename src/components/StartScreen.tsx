@@ -163,18 +163,18 @@ function CanvasButton({
   return (
     <button
       onClick={onClick}
-      className={`relative rounded-24px ${choice.bg} p-4 sm:p-6 flex flex-col items-center gap-3 transition-all ${
+      className={`relative rounded-24px ${choice.bg} p-4 sm:p-5 flex items-center justify-between gap-3 transition-all ${
         active
           ? 'ring-4 ring-tama-burgundy scale-[1.02]'
           : 'ring-0 hover:scale-[1.01] hover:brightness-95'
       }`}
     >
-      <div className="flex items-center justify-center h-16 sm:h-20">
-        <img src={choice.icon} alt={choice.label} className="h-full w-auto" />
-      </div>
-      <span className="font-fredoka font-semibold text-tama-burgundy text-sm sm:text-base">
+      <span className="font-fredoka font-semibold text-tama-burgundy text-sm sm:text-base text-left leading-tight flex-1">
         {choice.label}
       </span>
+      <div className="flex items-center justify-center h-14 sm:h-16 flex-shrink-0">
+        <img src={choice.icon} alt={choice.label} className="h-full w-auto" />
+      </div>
     </button>
   );
 }
