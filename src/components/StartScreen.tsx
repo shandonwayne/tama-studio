@@ -231,7 +231,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
           <button
             onClick={handleStart}
-            className="w-full rounded-24px bg-tama-red py-2.5 font-fredoka text-base font-bold uppercase tracking-[0.07em] text-white shadow-lg shadow-tama-red/25 transition hover:-translate-y-0.5 hover:bg-[#d92f31] active:translate-y-0"
+            className="sticky bottom-0 z-10 w-full rounded-24px bg-tama-red py-5 font-fredoka text-base font-bold uppercase tracking-[0.07em] text-white shadow-lg shadow-tama-red/25 transition hover:-translate-y-0.5 hover:bg-[#d92f31] active:translate-y-0"
           >
             Start Designing
           </button>
