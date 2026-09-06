@@ -241,10 +241,10 @@ export function StartScreen({ onStart }: StartScreenProps) {
       <section className="relative hidden min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-screen">
         <div
           ref={containerRef}
-          className="relative grid h-full w-full max-w-none flex-1 gap-x-[6px] gap-y-[6px] place-items-center p-[50px]"
+          className="relative grid h-full w-full max-w-none flex-1 place-content-center gap-[6px] p-[50px]"
           style={{
-            gridTemplateColumns: 'repeat(14, minmax(0, 1fr))',
-            gridTemplateRows: 'repeat(10, minmax(0, 1fr))',
+            gridTemplateColumns: 'repeat(14, clamp(28px, 4vw, 40px))',
+            gridTemplateRows: 'repeat(10, clamp(28px, 4vw, 40px))',
           }}
         >
           {stringPoints.length >= 2 && (
@@ -339,7 +339,7 @@ function DimInput({
   return (
     <div className="group relative">
       <label
-        className={`flex items-center justify-between gap-1 rounded-24px pl-[22px] pr-[17.5px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
+        className={`flex items-center justify-between gap-1 rounded-24px px-[15px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
           disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
         }`}
       >

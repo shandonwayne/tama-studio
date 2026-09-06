@@ -75,7 +75,7 @@ export const StringCanvas = memo(function StringCanvas({ points, width, height }
     const draw = () => {
       context.clearRect(0, 0, width, height);
       context.strokeStyle = '#ffffff';
-      context.lineWidth = 12;
+      context.lineWidth = 4;
       context.lineCap = 'round';
       context.lineJoin = 'round';
 
@@ -167,12 +167,13 @@ export const StringCanvas = memo(function StringCanvas({ points, width, height }
     };
 
     const handlePointerLeave = () => {
-      activeRef.current = false;
-      cancelAnimationFrame(animationRef.current);
+      mouse.x = -1000;
+      mouse.y = -1000;
     };
 
-    activeRef.current = false;
+    activeRef.current = true;
     draw();
+    animationRef.current = requestAnimationFrame(step);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerleave', handlePointerLeave);
     return () => {
