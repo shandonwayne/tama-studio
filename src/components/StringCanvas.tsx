@@ -5,12 +5,6 @@ interface Point {
   y: number;
 }
 
-interface MouseState {
-  x: number;
-  y: number;
-  active: boolean;
-}
-
 interface Particle {
   x: number;
   y: number;
@@ -28,149 +22,166 @@ interface StringCanvasProps {
   points: Point[];
   width: number;
   height: number;
-  mouseRef: { current: MouseState };
 }
 
 function buildSegments(points: Point[]): Segment[] {
   if (points.length < 2) return [];
   const segments: Segment[] = [];
-  for (let i = 0; i < points.length - 1; i++) {
+  for (let i = 0; i < points.length - 1; i += 1) {
     const a = points[i];
     const b = points[i + 1];
-    const dist = Math.hypot(b.x - a.x, b.y - a.y);
-    const numParticles = Math.max(10, Math.floor(dist / 5));
-    const restLength = dist / numParticles;
+    const distance = Math.hypot(b.x - a.x, b.y - a.y);
+    const particleCount = Math.max(10, Math.floor(distance / 5));
+    const restLength = distance / particleCount;
     const particles: Particle[] = [];
-    for (let j = 0; j <= numParticles; j++) {
-      const t = j / numParticles;
-      const x = a.x + (b.x - a.x) * t;
-      const y = a.y + (b.y - a.y) * t;
-      particles.push({ x, y, ox: x, oy: y, pinned: j === 0 || j === numParticles });
+    for (let j = 0; j <= particleCount; j += 1) {
+      const progress = j / particleCount;
+      const x = a.x + (b.x - a.x) * progress;
+      const y = a.y + (b.y - a.y) * progress;
+      particles.push({ x, y, ox: x, oy: y, pinned: j === 0 || j === particleCount });
     }
     segments.push({ particles, restLength });
   }
   return segments;
 }
 
-export const StringCanvas = memo(function StringCanvas({
-  points,
-  width,
-  height,
-  mouseRef,
-}: StringCanvasProps) {
+export const StringCanvas = memo(function StringCanvas({ points, width, height }: StringCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const segmentsRef = useRef<Segment[]>([]);
-  const rafRef = useRef<number>(0);
-
-  useEffect(() => {
-    segmentsRef.current = buildSegments(points);
-  }, [points]);
+  const animationRef = useRef<number>(0);
+  const activeRef = useRef(false);
 
   useEffect(() => {
     if (width === 0 || height === 0) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+    const pixelRatio = window.devicePixelRatio || 1;
+    canvas.width = width * pixelRatio;
+    canvas.height = height * pixelRatio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
+    const segments = buildSegments(points);
+    const mouse = { x: 0, y: 0 };
     const gravity = 0.35;
     const friction = 0.97;
     const mouseRadius = 70;
     const mouseForce = 6;
-    const iterations = 5;
+    const stringHitRadius = 22;
 
-    const step = () => {
-      const segments = segmentsRef.current;
-      const mouse = mouseRef.current;
-
-      for (const segment of segments) {
-        for (const p of segment.particles) {
-          if (p.pinned) continue;
-          const vx = (p.x - p.ox) * friction;
-          const vy = (p.y - p.oy) * friction;
-          p.ox = p.x;
-          p.oy = p.y;
-          p.x += vx;
-          p.y += vy + gravity;
-
-          if (mouse.active) {
-            const dx = p.x - mouse.x;
-            const dy = p.y - mouse.y;
-            const distSq = dx * dx + dy * dy;
-            if (distSq < mouseRadius * mouseRadius && distSq > 0.1) {
-              const dist = Math.sqrt(distSq);
-              const force = (1 - dist / mouseRadius) * mouseForce;
-              p.x += (dx / dist) * force;
-              p.y += (dy / dist) * force;
-            }
-          }
-        }
-      }
-
-      for (let iter = 0; iter < iterations; iter++) {
-        for (const segment of segments) {
-          const ps = segment.particles;
-          for (let i = 0; i < ps.length - 1; i++) {
-            const a = ps[i];
-            const b = ps[i + 1];
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const dist = Math.hypot(dx, dy) || 0.001;
-            const diff = (dist - segment.restLength) / dist;
-            const ox = dx * 0.5 * diff;
-            const oy = dy * 0.5 * diff;
-            if (!a.pinned) {
-              a.x += ox;
-              a.y += oy;
-            }
-            if (!b.pinned) {
-              b.x -= ox;
-              b.y -= oy;
-            }
-          }
-        }
-      }
-
-      ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 20;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+    const draw = () => {
+      context.clearRect(0, 0, width, height);
+      context.strokeStyle = '#ffffff';
+      context.lineWidth = 12;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
       for (const segment of segments) {
         if (segment.particles.length < 2) continue;
-        ctx.beginPath();
-        ctx.moveTo(segment.particles[0].x, segment.particles[0].y);
-        for (let i = 1; i < segment.particles.length - 1; i++) {
-          const p = segment.particles[i];
+        context.beginPath();
+        context.moveTo(segment.particles[0].x, segment.particles[0].y);
+        for (let i = 1; i < segment.particles.length - 1; i += 1) {
+          const particle = segment.particles[i];
           const next = segment.particles[i + 1];
-          const midX = (p.x + next.x) / 2;
-          const midY = (p.y + next.y) / 2;
-          ctx.quadraticCurveTo(p.x, p.y, midX, midY);
+          context.quadraticCurveTo(
+            particle.x,
+            particle.y,
+            (particle.x + next.x) / 2,
+            (particle.y + next.y) / 2,
+          );
         }
         const last = segment.particles[segment.particles.length - 1];
-        ctx.lineTo(last.x, last.y);
-        ctx.stroke();
+        context.lineTo(last.x, last.y);
+        context.stroke();
       }
-
-      rafRef.current = requestAnimationFrame(step);
     };
 
-    rafRef.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [width, height, mouseRef]);
+    const isPointerOverString = () => segments.some((segment) => segment.particles.some((particle) =>
+      Math.hypot(particle.x - mouse.x, particle.y - mouse.y) <= stringHitRadius,
+    ));
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-0"
-    />
-  );
+    const step = () => {
+      if (!activeRef.current) return;
+      for (const segment of segments) {
+        for (const particle of segment.particles) {
+          if (particle.pinned) continue;
+          const velocityX = (particle.x - particle.ox) * friction;
+          const velocityY = (particle.y - particle.oy) * friction;
+          particle.ox = particle.x;
+          particle.oy = particle.y;
+          particle.x += velocityX;
+          particle.y += velocityY + gravity;
+
+          const dx = particle.x - mouse.x;
+          const dy = particle.y - mouse.y;
+          const distanceSquared = dx * dx + dy * dy;
+          if (distanceSquared < mouseRadius * mouseRadius && distanceSquared > 0.1) {
+            const distance = Math.sqrt(distanceSquared);
+            const force = (1 - distance / mouseRadius) * mouseForce;
+            particle.x += (dx / distance) * force;
+            particle.y += (dy / distance) * force;
+          }
+        }
+      }
+
+      for (let iteration = 0; iteration < 5; iteration += 1) {
+        for (const segment of segments) {
+          const particles = segment.particles;
+          for (let i = 0; i < particles.length - 1; i += 1) {
+            const a = particles[i];
+            const b = particles[i + 1];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const distance = Math.hypot(dx, dy) || 0.001;
+            const difference = (distance - segment.restLength) / distance;
+            const offsetX = dx * 0.5 * difference;
+            const offsetY = dy * 0.5 * difference;
+            if (!a.pinned) {
+              a.x += offsetX;
+              a.y += offsetY;
+            }
+            if (!b.pinned) {
+              b.x -= offsetX;
+              b.y -= offsetY;
+            }
+          }
+        }
+      }
+
+      draw();
+      animationRef.current = requestAnimationFrame(step);
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = event.clientX - rect.left;
+      mouse.y = event.clientY - rect.top;
+      if (isPointerOverString()) {
+        activeRef.current = true;
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    const handlePointerLeave = () => {
+      activeRef.current = false;
+      cancelAnimationFrame(animationRef.current);
+    };
+
+    activeRef.current = false;
+    draw();
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('pointerleave', handlePointerLeave);
+    return () => {
+      activeRef.current = false;
+      cancelAnimationFrame(animationRef.current);
+      canvas.removeEventListener('pointermove', handlePointerMove);
+      canvas.removeEventListener('pointerleave', handlePointerLeave);
+    };
+  }, [points, width, height]);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-auto" />;
 });

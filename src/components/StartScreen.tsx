@@ -50,6 +50,7 @@ const BEAD_CHOICES: BeadChoice[] = [
 ];
 
 const DOT_COLORS = ['#FF9AAF', '#009959', '#1C7F96', '#FACC41', '#F9662F'];
+const CLICK_COLORS = DOT_COLORS.filter((color) => color !== '#FF9AAF');
 const DOT_COLUMNS = 14;
 const DOT_ROWS = 10;
 
@@ -78,11 +79,6 @@ function makeInitialDots(): Record<string, string> {
   return dots;
 }
 
-function getHoverColor(color: string): string {
-  const colorIndex = DOT_COLORS.indexOf(color);
-  return DOT_COLORS[(colorIndex + 1) % DOT_COLORS.length];
-}
-
 
 
 export function StartScreen({ onStart }: StartScreenProps) {
@@ -92,12 +88,12 @@ export function StartScreen({ onStart }: StartScreenProps) {
   const [heightStr, setHeightStr] = useState('12');
   const [name, setName] = useState('UNTITLED');
   const [nameFocused, setNameFocused] = useState(false);
-  const [dots] = useState<Record<string, string>>(makeInitialDots);
+  const [dots, setDots] = useState<Record<string, string>>(makeInitialDots);
   const [selectedDots, setSelectedDots] = useState<string[]>([]);
   const [hoveredDot, setHoveredDot] = useState<string | null>(null);
+  const [hoverColors, setHoverColors] = useState<Record<string, string>>({});
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-  const mouseRef = useRef({ x: 0, y: 0, active: false });
 
   const canvas = CANVAS_CHOICES.find((choice) => choice.id === canvasId) ?? CANVAS_CHOICES[0];
   const bead = BEAD_CHOICES.find((choice) => choice.id === beadId) ?? BEAD_CHOICES[0];
@@ -117,9 +113,21 @@ export function StartScreen({ onStart }: StartScreenProps) {
   };
 
   const handleDotClick = (key: string) => {
+    setDots((current) => ({
+      ...current,
+      [key]: CLICK_COLORS[Math.floor(Math.random() * CLICK_COLORS.length)],
+    }));
     setSelectedDots((current) =>
       current.includes(key) ? current.filter((selectedKey) => selectedKey !== key) : [...current, key],
     );
+  };
+
+  const handleDotEnter = (key: string) => {
+    setHoveredDot(key);
+    setHoverColors((current) => ({
+      ...current,
+      [key]: DOT_COLORS[Math.floor(Math.random() * DOT_COLORS.length)],
+    }));
   };
 
   const getDotCenter = useCallback(
@@ -152,32 +160,11 @@ export function StartScreen({ onStart }: StartScreenProps) {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const handleMove = (event: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      mouseRef.current = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-        active: true,
-      };
-    };
-    const handleLeave = () => {
-      mouseRef.current.active = false;
-    };
-    container.addEventListener('mousemove', handleMove);
-    container.addEventListener('mouseleave', handleLeave);
-    return () => {
-      container.removeEventListener('mousemove', handleMove);
-      container.removeEventListener('mouseleave', handleLeave);
-    };
-  }, []);
 
   return (
     <main className="min-h-screen bg-tama-white text-tama-burgundy lg:flex">
       <section className="w-full bg-tama-white px-6 py-6 lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:max-w-[520px] lg:overflow-y-auto lg:px-6 lg:py-8 xl:px-6">
-        <div className="mx-auto flex max-w-[440px] flex-col gap-5">
+        <div className="flex w-full flex-col gap-5">
           <div className="flex justify-center pb-1">
             <img src="/Logo.svg" alt="Tama Studio" className="h-auto w-[112px]" />
           </div>
@@ -249,11 +236,10 @@ export function StartScreen({ onStart }: StartScreenProps) {
         </div>
       </section>
 
-      <section className="relative flex min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:h-screen lg:min-h-screen">
-        <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(#ff9aaf_1px,transparent_1px)] [background-size:32px_32px]" />
+      <section className="relative hidden min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-screen">
         <div
           ref={containerRef}
-          className="relative grid h-full w-full max-w-none flex-1 gap-x-[15px] gap-y-[15px] place-items-center"
+          className="relative grid h-full w-full max-w-none flex-1 gap-x-[6px] gap-y-[6px] place-items-center p-[50px]"
           style={{
             gridTemplateColumns: 'repeat(14, minmax(0, 1fr))',
             gridTemplateRows: 'repeat(10, minmax(0, 1fr))',
@@ -264,7 +250,6 @@ export function StartScreen({ onStart }: StartScreenProps) {
               points={stringPoints}
               width={containerSize.width}
               height={containerSize.height}
-              mouseRef={mouseRef}
             />
           )}
           {Object.entries(dots).map(([key, color]) => {
@@ -276,10 +261,10 @@ export function StartScreen({ onStart }: StartScreenProps) {
                 aria-label={`Select bead ${key}`}
                 data-dot-key={key}
                 onClick={() => handleDotClick(key)}
-                onMouseEnter={() => setHoveredDot(key)}
+                onMouseEnter={() => handleDotEnter(key)}
                 onMouseLeave={() => setHoveredDot(null)}
                 className="z-10 h-[clamp(28px,4vw,40px)] w-[clamp(28px,4vw,40px)] rounded-full border-0 p-0 outline-none transition duration-200 hover:scale-125 focus:outline-none focus:ring-0"
-                style={{ backgroundColor: isHovered ? getHoverColor(color) : color }}
+                style={{ backgroundColor: isHovered ? hoverColors[key] : color }}
               />
             );
           })}
