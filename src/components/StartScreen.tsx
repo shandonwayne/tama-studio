@@ -113,8 +113,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
   return (
     <main className="min-h-screen bg-tama-white text-tama-burgundy lg:flex">
-      <section className="w-full bg-tama-white px-5 py-6 sm:px-10 lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:max-w-[470px] lg:overflow-y-auto lg:px-6 lg:py-8 xl:px-10">
-        <div className="mx-auto flex max-w-[390px] flex-col gap-5">
+      <section className="w-full bg-tama-white px-5 py-6 sm:px-10 lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:max-w-[520px] lg:overflow-y-auto lg:px-6 lg:py-8 xl:px-10">
+        <div className="mx-auto flex max-w-[440px] flex-col gap-5">
           <div className="flex justify-center pb-1">
             <img src="/Logo.svg" alt="Tama Studio" className="h-auto w-[112px]" />
           </div>
@@ -125,7 +125,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
               value={name}
               onChange={(event) => setName(event.target.value.toUpperCase())}
               maxLength={60}
-              className="w-full rounded-24px bg-white px-5 py-3 text-center font-fredoka text-sm font-bold uppercase tracking-wide text-tama-burgundy outline-none ring-2 ring-transparent transition focus:ring-tama-lavender"
+              className="w-full rounded-24px bg-white px-5 py-3.5 text-center font-fredoka text-base font-bold uppercase tracking-wide text-tama-burgundy outline-none ring-2 ring-transparent transition focus:ring-tama-lavender"
             />
           </QuestionCard>
 
@@ -176,16 +176,18 @@ export function StartScreen({ onStart }: StartScreenProps) {
         </div>
       </section>
 
-      <section className="relative flex min-h-[560px] flex-1 items-start justify-center overflow-hidden bg-tama-burgundy px-6 py-14 sm:px-12 sm:py-16 lg:sticky lg:top-0 lg:h-screen lg:min-h-screen lg:px-16 lg:py-16 xl:px-24">
+      <section className="relative flex min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy px-6 py-14 sm:px-12 sm:py-16 lg:sticky lg:top-0 lg:h-screen lg:min-h-screen lg:px-16 lg:py-16 xl:px-24">
         <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(#ff9aaf_1px,transparent_1px)] [background-size:32px_32px]" />
-        <div className="relative grid w-full max-w-[780px] grid-cols-[repeat(14,minmax(0,1fr))] gap-x-2 gap-y-5 sm:gap-x-4 sm:gap-y-7 lg:gap-x-5 lg:gap-y-8 xl:gap-x-6 xl:gap-y-9">
+        <div className="relative grid w-full max-w-[780px] flex-1 content-center grid-cols-[repeat(14,minmax(0,1fr))] gap-x-2 gap-y-3 sm:gap-x-4 sm:gap-y-5 lg:gap-x-5 lg:gap-y-7 xl:gap-x-6 xl:gap-y-8">
           {Object.entries(dots).map(([key, color]) => (
             <button
               key={key}
               type="button"
               aria-label={`Edit bead ${key}`}
               onClick={() => handleDotClick(key)}
-              className="aspect-square w-full rounded-full transition duration-200 hover:scale-125 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/80"
+              onMouseEnter={(event) => { event.currentTarget.style.backgroundColor = DOT_COLORS[Math.floor(Math.random() * DOT_COLORS.length)]; }}
+              onMouseLeave={(event) => { event.currentTarget.style.backgroundColor = dots[key]; }}
+              className="aspect-square w-full rounded-full transition duration-200 hover:scale-125 focus:outline-none focus:ring-2 focus:ring-white/80"
               style={{ backgroundColor: color }}
             />
           ))}
@@ -200,8 +202,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
 function QuestionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-24px bg-tama-pale/90 p-3">
-      <h2 className="mb-3 text-center font-public text-[10px] font-black uppercase tracking-[0.08em] text-tama-burgundy/70">
+    <section className="rounded-24px bg-tama-pale/90 p-4">
+      <h2 className="mb-3 text-center font-public text-xs font-black uppercase tracking-[0.08em] text-tama-burgundy/70">
         {title}
       </h2>
       {children}
@@ -215,11 +217,11 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
       type="button"
       onClick={onClick}
       title={choice.id === 'loom' ? 'The loom layout auto extends the grid as you build your design, no need to set a fixed height.' : undefined}
-      className={`relative flex min-h-[92px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-3 py-3 transition-all ${
+      className={`relative flex min-h-[96px] items-center justify-between gap-2 rounded-24px ${choice.bg} px-3.5 py-3.5 transition-all ${
         active ? 'ring-2 ring-tama-burgundy ring-offset-1' : 'hover:brightness-95'
       }`}
     >
-      <span className="text-left font-fredoka text-xs font-bold uppercase leading-tight text-tama-burgundy">
+      <span className="text-left font-fredoka text-sm font-bold uppercase leading-tight text-tama-burgundy">
         {choice.label}
       </span>
       <img src={choice.icon} alt="" className="h-12 w-auto max-w-[58px]" />
@@ -232,11 +234,11 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-24px px-3 py-2.5 text-left font-fredoka text-[10px] font-bold uppercase leading-tight transition-all ${
+      className={`flex items-center gap-2 rounded-24px px-3.5 py-3 text-left font-fredoka text-xs font-bold uppercase leading-tight transition-all ${
         active ? 'bg-tama-burgundy text-white ring-2 ring-tama-red/50' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
       }`}
     >
-      <span className="text-base leading-none text-tama-red">{choice.icon}</span>
+      <span className="text-lg leading-none text-tama-red">{choice.icon}</span>
       <span>{choice.label}</span>
     </button>
   );
@@ -255,7 +257,7 @@ function DimInput({
 }) {
   return (
     <label
-      className={`flex items-center justify-center gap-2 rounded-24px px-3 py-3 font-fredoka text-[10px] font-bold uppercase transition ${
+      className={`flex items-center justify-center gap-2 rounded-24px px-3 py-3.5 font-fredoka text-xs font-bold uppercase transition ${
         disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
       }`}
     >
@@ -267,7 +269,7 @@ function DimInput({
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="w-8 bg-transparent text-center text-sm font-bold outline-none disabled:cursor-not-allowed"
+        className="w-10 bg-transparent text-center text-base font-bold outline-none disabled:cursor-not-allowed"
       />
     </label>
   );
