@@ -20,7 +20,7 @@ import { PalettePanel } from '@/components/PalettePanel';
 import { BeadCountPanel } from '@/components/BeadCountPanel';
 
 import { TextPanel } from '@/components/TextPanel';
-import logoUrl from '/logo.svg';
+import logoUrl from '/Logo.svg';
 import type { FontLibraryName } from '@/lib/oldEnglishFont';
 import { FONT_LIBRARIES } from '@/lib/oldEnglishFont';
 
@@ -224,15 +224,15 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-tama-white flex flex-col">
       {/* Top bar */}
-      <header className="bg-white border-b border-stone-100 sticky top-0 z-30">
+      <header className="bg-white border-b border-tama-pale/40 sticky top-0 z-30">
         <div className="px-3 sm:px-5 py-2.5 flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => {
               setConfig(null);
             }}
-            className="flex items-center gap-2 text-stone-700 hover:text-amber-600 transition flex-shrink-0"
+            className="flex items-center gap-2 text-tama-burgundy hover:text-tama-red transition flex-shrink-0"
           >
             <img src={logoUrl} alt="Tama Studio" className="h-7 w-auto" />
           </button>
