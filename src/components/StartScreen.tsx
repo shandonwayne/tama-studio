@@ -299,7 +299,7 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
         active ? 'ring-2 ring-tama-burgundy ring-offset-1' : 'hover:brightness-95'
       }`}
     >
-      <span className="text-left font-fredoka text-sm font-bold uppercase leading-tight text-tama-burgundy">
+      <span className="text-left font-fredoka text-[22px] font-bold uppercase leading-tight text-tama-burgundy">
         {choice.label}
       </span>
       <img src={choice.icon} alt="" className="h-12 w-auto max-w-[58px]" />
@@ -312,7 +312,7 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-24px px-3.5 py-3 text-left font-fredoka text-xs font-bold uppercase leading-tight transition-all ${
+      className={`flex items-center gap-2 rounded-24px px-3.5 py-3 text-left font-fredoka text-base font-bold uppercase leading-tight transition-all ${
         active ? 'bg-tama-burgundy text-white ring-2 ring-tama-red/50' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
       }`}
     >
