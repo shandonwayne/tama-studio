@@ -350,7 +350,7 @@ function DimInput({
   return (
     <div className="group relative">
       <label
-        className={`flex items-center justify-between gap-1 rounded-full px-[15px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
+        className={`flex items-center justify-between gap-1 rounded-full px-[25px] py-[17.5px] font-fredoka text-xs font-bold uppercase tracking-[0.07em] transition ${
           disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
         }`}
       >
