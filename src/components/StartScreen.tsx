@@ -52,25 +52,24 @@ const BEAD_CHOICES: BeadChoice[] = [
 
 const DOT_COLORS = ['#FF9AAF', '#009959', '#1C7F96', '#FACC41', '#F9662F'];
 const CLICK_COLORS = DOT_COLORS.filter((color) => color !== '#FF9AAF');
-const DOT_COLUMNS = 14;
-const DOT_ROWS = 10;
+const DOT_COLUMNS = 9;
+const DOT_ROWS = 9;
 
 function makeInitialDots(): Record<string, string> {
   const dots: Record<string, string> = {};
   const accents: Record<string, string> = {
+    '0-1': '#FACC41',
     '2-2': '#009959',
-    '2-9': '#009959',
+    '2-8': '#009959',
+    '3-2': '#F9662F',
     '3-4': '#F9662F',
     '3-7': '#FACC41',
-    '3-11': '#009959',
-    '3-12': '#F9662F',
     '6-5': '#1C7F96',
-    '6-12': '#1C7F96',
+    '6-8': '#1C7F96',
     '7-2': '#009959',
-    '7-9': '#FACC41',
+    '7-7': '#FACC41',
     '8-4': '#F9662F',
     '8-5': '#F9662F',
-    '9-1': '#FACC41',
   };
   for (let row = 0; row < DOT_ROWS; row += 1) {
     for (let column = 0; column < DOT_COLUMNS; column += 1) {
@@ -243,8 +242,8 @@ export function StartScreen({ onStart }: StartScreenProps) {
           ref={containerRef}
           className="relative grid h-full w-full max-w-none flex-1 place-content-center gap-y-[14px] p-[60px]"
           style={{
-            gridTemplateColumns: 'repeat(14, clamp(28px, 4vw, 40px))',
-            gridTemplateRows: 'repeat(10, clamp(28px, 4vw, 40px))',
+            gridTemplateColumns: 'repeat(9, clamp(28px, 5vw, 48px))',
+            gridTemplateRows: 'repeat(9, clamp(28px, 5vw, 48px))',
             columnGap: '16px',
           }}
         >
