@@ -241,11 +241,11 @@ export function StartScreen({ onStart }: StartScreenProps) {
       <section className="relative hidden min-h-[560px] flex-1 items-stretch justify-center overflow-hidden bg-tama-burgundy p-3 lg:sticky lg:top-0 lg:flex lg:h-screen lg:min-h-screen">
         <div
           ref={containerRef}
-          className="relative grid h-full w-full max-w-none flex-1 place-content-center gap-y-[8px] p-[60px]"
+          className="relative grid h-full w-full max-w-none flex-1 place-content-center gap-y-[14px] p-[60px]"
           style={{
             gridTemplateColumns: 'repeat(14, clamp(28px, 4vw, 40px))',
             gridTemplateRows: 'repeat(10, clamp(28px, 4vw, 40px))',
-            columnGap: '8px',
+            columnGap: '16px',
           }}
         >
           {stringPoints.length >= 2 && (
