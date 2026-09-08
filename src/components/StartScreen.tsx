@@ -230,7 +230,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
           <button
             onClick={handleStart}
-            className="sticky bottom-0 z-10 w-full rounded-24px bg-tama-red py-5 font-fredoka text-base font-bold uppercase tracking-[0.07em] text-white shadow-lg shadow-tama-red/25 transition hover:-translate-y-0.5 hover:bg-[#d92f31] active:translate-y-0"
+            className="sticky bottom-0 z-10 w-full rounded-full bg-tama-red py-5 font-fredoka text-base font-bold uppercase tracking-[0.07em] text-white shadow-lg shadow-tama-red/25 transition hover:-translate-y-0.5 hover:bg-[#d92f31] active:translate-y-0"
           >
             Start Designing
           </button>
@@ -354,7 +354,7 @@ function DimInput({
           disabled ? 'bg-tama-pale/70 text-tama-burgundy/35' : 'bg-white text-tama-burgundy'
         }`}
       >
-        <span className="shrink-0">{label}</span>
+        <span className="shrink-0 text-base">{label}</span>
         <input
           type="number"
           min={1}
