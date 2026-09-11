@@ -321,11 +321,11 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 rounded-full px-[20px] py-[18px] text-left font-fredoka text-base font-bold uppercase tracking-[0.07em] leading-tight transition-all ${
-        active ? 'bg-tama-burgundy text-white ring-2 ring-tama-red/50' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
+      className={`group flex items-center gap-2 rounded-full px-[20px] py-[18px] text-left font-fredoka text-base font-bold uppercase tracking-[0.07em] leading-tight transition-all ${
+        active ? 'bg-tama-red text-white' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
       }`}
     >
-      <span className="text-lg leading-none text-tama-red">{choice.icon}</span>
+      <span className="text-lg leading-none text-tama-red transition-colors group-hover:text-tama-burgundy">{choice.icon}</span>
       <span>{choice.label}</span>
     </button>
   );
