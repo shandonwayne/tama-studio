@@ -20,7 +20,7 @@ function getBaseCellDimensions(
   const isRocailles = brand === 'miyuki' && miyukiShape === 'rocailles';
   const isDelica = brand === 'miyuki' && miyukiShape === 'delica';
   if (isRocailles) return { w: baseSize, h: Math.round(baseSize * 1.2) };
-  if (isDelica) return { w: baseSize, h: Math.round(baseSize * 0.75) };
+  if (isDelica) return { w: baseSize, h: Math.round(baseSize * 0.75) + 3 };
   return { w: baseSize, h: baseSize };
 }
 
