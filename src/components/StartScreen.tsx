@@ -47,7 +47,7 @@ const BEAD_CHOICES: BeadChoice[] = [
   { id: 'rocailles', label: 'Miyuki Rocailles', shape: 'circle', icon: '●', brand: 'miyuki', miyukiShape: 'rocailles' },
   { id: 'delica', label: 'Miyuki Delica', shape: 'square', icon: '■', brand: 'miyuki', miyukiShape: 'delica' },
   { id: 'toho', label: 'Toho Round', shape: 'circle', icon: '●', brand: 'toho', miyukiShape: 'delica' },
-  { id: 'unsure', label: "I'm Not Sure!", shape: 'star', icon: '★', brand: 'miyuki', miyukiShape: 'rocailles' },
+  { id: 'unsure', label: "I'm Not Sure!", shape: 'star', icon: '★', brand: 'generic', miyukiShape: 'delica' },
 ];
 
 const DOT_COLORS = ['#FF9AAF', '#009959', '#1C7F96', '#FACC41', '#F9662F'];

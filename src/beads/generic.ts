@@ -1,22 +1,28 @@
 import type { BeadColor } from './miyuki';
 
-export const genericColors: BeadColor[] = [
-  { code: '#FF0000', name: 'Red', hex: '#FF0000' },
-  { code: '#FF4500', name: 'Orange Red', hex: '#FF4500' },
-  { code: '#FF7F00', name: 'Orange', hex: '#FF7F00' },
-  { code: '#FFA500', name: 'Light Orange', hex: '#FFA500' },
-  { code: '#FFFF00', name: 'Yellow', hex: '#FFFF00' },
-  { code: '#9ACD32', name: 'Yellow Green', hex: '#9ACD32' },
-  { code: '#00FF00', name: 'Green', hex: '#00FF00' },
-  { code: '#008000', name: 'Dark Green', hex: '#008000' },
-  { code: '#00FFFF', name: 'Cyan', hex: '#00FFFF' },
-  { code: '#0000FF', name: 'Blue', hex: '#0000FF' },
-  { code: '#000080', name: 'Navy', hex: '#000080' },
-  { code: '#4B0082', name: 'Indigo', hex: '#4B0082' },
-  { code: '#8A2BE2', name: 'Blue Violet', hex: '#8A2BE2' },
-  { code: '#9400D3', name: 'Violet', hex: '#9400D3' },
-  { code: '#FF00FF', name: 'Magenta', hex: '#FF00FF' },
-  { code: '#FFFFFF', name: 'White', hex: '#FFFFFF' },
-  { code: '#808080', name: 'Gray', hex: '#808080' },
-  { code: '#000000', name: 'Black', hex: '#000000' },
-];
+function hslToHex(hue: number, saturation: number, lightness: number): string {
+  const s = saturation / 100;
+  const l = lightness / 100;
+  const chroma = (1 - Math.abs(2 * l - 1)) * s;
+  const section = hue / 60;
+  const x = chroma * (1 - Math.abs((section % 2) - 1));
+  const match = l - chroma / 2;
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+
+  if (section < 1) [red, green, blue] = [chroma, x, 0];
+  else if (section < 2) [red, green, blue] = [x, chroma, 0];
+  else if (section < 3) [red, green, blue] = [0, chroma, x];
+  else if (section < 4) [red, green, blue] = [0, x, chroma];
+  else if (section < 5) [red, green, blue] = [x, 0, chroma];
+  else [red, green, blue] = [chroma, 0, x];
+
+  const channel = (value: number) => Math.round((value + match) * 255).toString(16).padStart(2, '0');
+  return `#${channel(red)}${channel(green)}${channel(blue)}`.toUpperCase();
+}
+
+export const genericColors: BeadColor[] = Array.from({ length: 100 }, (_, index) => {
+  const hex = hslToHex(index * 3.6, 85, 50);
+  return { code: hex, name: hex, hex };
+});

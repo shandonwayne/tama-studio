@@ -27,6 +27,7 @@ import { FONT_LIBRARIES } from '@/lib/oldEnglishFont';
 
 import { useExportPNG, downloadProjectFile, parseProjectFile } from '@/lib/export';
 import { BeadColor, Brand, MiyukiShape, ProjectType, StitchType, findColor, convertGridColors } from '@/beads';
+import { genericColors } from '@/beads/generic';
 
 interface ProjectConfig {
   projectType: ProjectType;
@@ -83,7 +84,7 @@ export default function App() {
     if (config.brand === 'miyuki')
       setSelectedColor(config.miyukiShape === 'rocailles' ? 'MR-2002' : 'DB0010');
     else if (config.brand === 'toho') setSelectedColor('TR-11-401');
-    else if (config.brand === 'generic') setSelectedColor('#FF0000');
+    else if (config.brand === 'generic') setSelectedColor(genericColors[0]?.code ?? '#FF0000');
     else if (customColors.length > 0) setSelectedColor(customColors[0].code);
   }, [config?.brand, config?.miyukiShape]); // eslint-disable-line react-hooks/exhaustive-deps
 

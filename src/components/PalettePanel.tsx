@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Search, X, Plus, SlidersHorizontal, Droplet, Type, Check } from 'lucide-react';
 import type { BeadColor, BeadType, Brand, MiyukiShape } from '@/beads';
 import { getBrandColors, getBeadType, BEAD_TYPE_ORDER, shortName } from '@/beads';
+import { genericColors } from '@/beads/generic';
 import { ColorSpectrumPicker } from './ColorSpectrumPicker';
 
 // Sort colors by hue (rainbow order), then by lightness, then by saturation.
@@ -58,7 +59,11 @@ export function PalettePanel({
   onAddCustomColor,
 }: PalettePanelProps) {
   const colors = useMemo(
-    () => (brand === 'other' ? customColors : getBrandColors(brand, miyukiShape)),
+    () => brand === 'other'
+      ? customColors
+      : brand === 'generic'
+        ? [...genericColors, ...customColors]
+        : getBrandColors(brand, miyukiShape),
     [brand, miyukiShape, customColors]
   );
   const [query, setQuery] = useState('');
@@ -79,7 +84,7 @@ export function PalettePanel({
     return BEAD_TYPE_ORDER.filter((t) => set.has(t));
   }, [colors]);
 
-  const showTypeFilter = brand !== 'other' && availableTypes.length > 1;
+  const showTypeFilter = brand !== 'other' && brand !== 'generic' && availableTypes.length > 1;
   const showGrouped = activeType === 'All' && showTypeFilter;
 
   const filtered = useMemo(() => {
@@ -196,7 +201,7 @@ export function PalettePanel({
       <div className="p-4 border-b border-stone-100">
         {/* Toolbar: Add button (custom only) + filter/search toggle icons */}
         <div className="flex items-center justify-between gap-2">
-          {brand === 'other' ? (
+          {brand === 'other' || brand === 'generic' ? (
             <button
               onClick={() => setShowAdd(!showAdd)}
               className="flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700"
@@ -234,7 +239,7 @@ export function PalettePanel({
           </div>
         </div>
 
-        {showAdd && brand === 'other' && (
+        {showAdd && (brand === 'other' || brand === 'generic') && (
           <div className="mt-3 p-3 rounded-xl bg-stone-50">
             <ColorSpectrumPicker onAdd={handleAdd} />
           </div>
@@ -297,7 +302,9 @@ export function PalettePanel({
           <p className="text-center text-sm text-stone-400 py-8">
             {brand === 'other'
               ? 'No custom colors yet. Click Add to create one.'
-              : 'No colors match your search.'}
+              : brand === 'generic'
+                ? 'No colors available.'
+                : 'No colors match your search.'}
           </p>
         ) : showGrouped ? (
           <div className="space-y-3">

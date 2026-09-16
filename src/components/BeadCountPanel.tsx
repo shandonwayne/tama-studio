@@ -60,14 +60,15 @@ export function BeadCountPanel({
 
   const isRocailles = brand === 'miyuki' && miyukiShape === 'rocailles';
   const isDelica = brand === 'miyuki' && miyukiShape === 'delica';
+  const isGeneric = brand === 'generic';
   const orientation = getOrientation(cols, gridRows);
 
   // Cell aspect ratio for preview pixels, matching the editor's bead shape
   const cellAspect = useMemo(() => {
-    // Base aspect (portrait): rocailles 1:1.2, delica 1:0.75, other 1:1
+    // Base aspect (portrait): rocailles 1:1, delica 1:0.75, other 1:1
     let wRatio = 1;
     let hRatio = 1;
-    if (isRocailles) hRatio = 1.2;
+    if (isRocailles) hRatio = 1;
     else if (isDelica) hRatio = 0.75;
     // Flip for landscape
     if (orientation === 'landscape' && wRatio !== hRatio) {
@@ -76,7 +77,7 @@ export function BeadCountPanel({
     return { w: wRatio, h: hRatio };
   }, [isRocailles, isDelica, orientation]);
 
-  const beadRadiusClass = isRocailles ? '38%' : isDelica ? '30%' : '33%';
+  const beadRadiusClass = isRocailles ? '38%' : isDelica ? '30%' : isGeneric ? '0' : '33%';
   const previewPixelShape = isRocailles || isDelica ? 'bead' : 'square';
 
   // Use an explicit width×height for the preview grid based on cell aspect
