@@ -265,7 +265,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
                 onClick={() => handleDotClick(key)}
                 onMouseEnter={() => handleDotEnter(key)}
                 onMouseLeave={() => setHoveredDot(null)}
-                className="relative z-10 flex h-[clamp(28px,4vw,40px)] w-[clamp(28px,4vw,40px)] items-center justify-center rounded-full border-0 p-0 outline-none shadow-[inset_0_-3px_5px_rgba(0,0,0,0.18),0_2px_5px_rgba(0,0,0,0.2)] transition duration-200 hover:scale-125 focus:outline-none focus:ring-0"
+                className="relative z-10 flex h-[clamp(28px,4vw,40px)] w-[clamp(28px,4vw,40px)] items-center justify-center rounded-full border-0 p-0 outline-none shadow-[inset_0_-3px_5px_rgba(0,0,0,0.18),0_2px_5px_rgba(0,0,0,0.2)] transition duration-200 hover:scale-100 focus:outline-none focus:ring-0"
                 style={{
                   background: `radial-gradient(circle, transparent 0 6px, ${isHovered ? hoverColors[key] : color} 6.5px 100%)`,
                 }}
