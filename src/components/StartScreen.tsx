@@ -370,7 +370,7 @@ function DimInput({
             tabIndex={-1}
             disabled={disabled}
             onClick={() => step(1)}
-            className="flex h-4 w-6 items-center justify-center rounded-full bg-tama-burgundy/10 text-tama-burgundy transition hover:bg-tama-red hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-tama-burgundy/10 disabled:hover:text-tama-burgundy"
+            className="mb-[2px] flex h-4 w-6 items-center justify-center rounded-full bg-tama-burgundy/10 text-tama-burgundy transition hover:bg-tama-red hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-tama-burgundy/10 disabled:hover:text-tama-burgundy"
           >
             <ChevronUp className="h-3 w-3" strokeWidth={3} />
           </button>
