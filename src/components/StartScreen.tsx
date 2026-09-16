@@ -325,7 +325,7 @@ function BeadButton({ choice, active, onClick }: { choice: BeadChoice; active: b
         active ? 'bg-tama-red text-white' : 'bg-tama-burgundy/95 text-white hover:bg-tama-red'
       }`}
     >
-      <span className="text-lg leading-none text-tama-red transition-colors group-hover:text-tama-burgundy">{choice.icon}</span>
+      <span className="text-lg leading-none text-tama-red transition-colors group-hover:text-tama-burgundy group-[.bg-tama-red]:text-tama-burgundy">{choice.icon}</span>
       <span>{choice.label}</span>
     </button>
   );
