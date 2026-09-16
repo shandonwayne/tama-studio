@@ -300,7 +300,7 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
       type="button"
       onClick={onClick}
       title={choice.id === 'loom' ? 'The loom layout auto extends the grid as you build your design, no need to set a fixed height.' : undefined}
-      className={`relative flex min-h-[128px] items-center justify-between gap-1 rounded-24px ${choice.bg} px-2.5 py-2.5 transition-all ${
+      className={`relative flex h-full min-h-[128px] items-center justify-between gap-1 rounded-24px ${choice.bg} px-2.5 py-2.5 transition-all ${
         active ? 'ring-2 ring-tama-burgundy ring-offset-1' : 'hover:brightness-95'
       }`}
     >
@@ -310,7 +310,7 @@ function CanvasButton({ choice, active, onClick }: { choice: CanvasChoice; activ
       <img
         src={choice.icon}
         alt=""
-        className={choice.id === 'loom' ? 'my-[-10px] h-[calc(100%+20px)] w-[46%] max-w-none object-contain' : 'h-[80%] w-[46%] max-w-none object-contain'}
+        className="h-[80%] max-h-[96px] w-[46%] max-w-none object-contain"
       />
     </button>
   );
