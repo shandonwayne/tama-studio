@@ -83,6 +83,7 @@ export default function App() {
     if (config.brand === 'miyuki')
       setSelectedColor(config.miyukiShape === 'rocailles' ? 'MR-2002' : 'DB0010');
     else if (config.brand === 'toho') setSelectedColor('TR-11-401');
+    else if (config.brand === 'generic') setSelectedColor('#FF0000');
     else if (customColors.length > 0) setSelectedColor(customColors[0].code);
   }, [config?.brand, config?.miyukiShape]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -219,7 +220,7 @@ export default function App() {
     if (!config) return;
     setBrandMenuOpen(false);
     setConverting(true);
-    setToast(`Converting to ${target === 'toho' ? 'Toho' : target === 'miyuki' ? `Miyuki ${targetShape === 'rocailles' ? 'Rocailles' : 'Delica'}` : 'Custom'}…`);
+    setToast(`Converting to ${target === 'toho' ? 'Toho' : target === 'miyuki' ? `Miyuki ${targetShape === 'rocailles' ? 'Rocailles' : 'Delica'}` : target === 'generic' ? 'Generic Template' : 'Custom'}…`);
     setTimeout(() => {
       const shape = targetShape ?? (target === 'miyuki' ? 'delica' : 'delica');
       const newGrid = convertGridColors(
@@ -287,6 +288,8 @@ export default function App() {
                   ? `Miyuki ${config.miyukiShape === 'rocailles' ? 'Rocailles' : 'Delica'}`
                   : config.brand === 'toho'
                   ? 'Toho'
+                  : config.brand === 'generic'
+                  ? 'Generic Template'
                   : 'Custom'}
                 <ChevronDown className="w-3 h-3" />
               </button>
@@ -327,6 +330,16 @@ export default function App() {
                     >
                       Toho Treasure
                       <span className="text-[10px] font-medium text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">Coming soon</span>
+                    </button>
+                    <button
+                      onClick={() => handleConvertBrand('generic')}
+                      disabled={config.brand === 'generic'}
+                      className="w-full flex items-center justify-between px-3 py-2.5 text-left text-sm text-stone-700 hover:bg-amber-50 disabled:opacity-40 disabled:hover:bg-transparent transition"
+                    >
+                      Generic Template
+                      {config.brand === 'generic' && (
+                        <span className="text-[10px] text-stone-400">current</span>
+                      )}
                     </button>
                     <div className="px-3 py-2 border-t border-stone-100 text-[10px] text-stone-400">
                       Colors matched to closest available bead

@@ -2,9 +2,10 @@ import type { BeadColor } from './miyuki';
 import { miyukiColors } from './miyuki';
 import { miyukiRoundColors } from './miyuki-round';
 import { tohoColors } from './toho';
+import { genericColors } from './generic';
 
 export type { BeadColor };
-export type Brand = 'miyuki' | 'toho' | 'other';
+export type Brand = 'miyuki' | 'toho' | 'generic' | 'other';
 export type ProjectType = 'loom' | 'freehand' | 'circle';
 export type MiyukiShape = 'delica' | 'rocailles';
 export type StitchType = 'brick' | 'peyote';
@@ -85,6 +86,7 @@ export function getBrandColors(brand: Brand, miyukiShape?: MiyukiShape | null): 
     return miyukiShape === 'rocailles' ? miyukiRoundColors : miyukiColors;
   }
   if (brand === 'toho') return tohoColors;
+  if (brand === 'generic') return genericColors;
   return [];
 }
 

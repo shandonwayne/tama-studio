@@ -54,5 +54,6 @@ export function getBeadRadius(
   if (brand === 'miyuki' && miyukiShape === 'delica')
     return Math.round(Math.min(cellW, cellH) * 0.3);
   if (brand === 'toho') return Math.floor(cellW / 3);
+  if (brand === 'generic') return 0;
   return 2;
 }
